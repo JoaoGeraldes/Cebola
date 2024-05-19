@@ -6,10 +6,11 @@ import { createId } from "@paralleldrive/cuid2";
 
 export class Cebola {
   static async createEntry(
-    obj: Omit<Entry, "date" | "previousEntryId" | "nextEntryId" | "keywords">
+    obj: Omit<Entry, "date" | "previousEntryId" | "nextEntryId" | "keywords">,
+    _id: string | null = null
   ) {
-    const uniqueID = createId();
-    const filePath = absolutePath(`./database/entries/${uniqueID}.json`);
+    const uniqueID = _id ? _id : createId();
+    const filePath = absolutePath(`./src/database/entries/${uniqueID}.json`);
 
     try {
       const lastInsertedEntryId = await this.getLastInsertedEntryId();
@@ -46,17 +47,31 @@ export class Cebola {
       await this.updateLastInsertedEntryId(uniqueID);
 
       console.log(`JSON file created successfully at ${filePath}`);
+      return true;
     } catch (error) {
       console.error(`Error creating JSON file at ${filePath}:`, error.message);
-      throw new Error(
-        `createEntry() - Error creating JSON file at ${filePath}:`,
-        error.message
-      );
+      return false;
+      /*   throw new Error(
+        `createEntry() - Error creating JSON file at ${filePath}:`
+      ); */
+    }
+  }
+
+  static async getEntry(entryId: string) {
+    const filePath = absolutePath(`./src/database/entries/${entryId}.json`);
+
+    try {
+      const entryJson = await fs.readFile(filePath, "utf8");
+      const entryData: Partial<Entry> = JSON.parse(entryJson);
+      return entryData;
+    } catch (error) {
+      console.log(`getEntry() - Failed to retrieve JSON file at ${filePath}:`);
+      return false;
     }
   }
 
   static async updateEntry(entryId: string, updates: Partial<Entry>) {
-    const filePath = absolutePath(`./database/entries/${entryId}.json`);
+    const filePath = absolutePath(`./src/database/entries/${entryId}.json`);
 
     try {
       const entryJson = await fs.readFile(filePath, "utf8");
@@ -74,11 +89,10 @@ export class Cebola {
       await fs.writeFile(filePath, jsonString, "utf8");
 
       console.log(`JSON file updated successfully at ${filePath}`);
+      return true;
     } catch (error) {
-      throw new Error(
-        `updateEntry() - Error updating JSON file at ${filePath}:`,
-        error.message
-      );
+      console.log(`updateEntry() - Error updating JSON file at ${filePath}:`);
+      return false;
     }
   }
 
@@ -133,8 +147,8 @@ export class Cebola {
     }
   }
 
-  private static async updateLastInsertedEntryId(newId: string | null) {
-    const filePath = absolutePath(`./database/last-inserted-entry-id.json`);
+  static async updateLastInsertedEntryId(newId: string | null) {
+    const filePath = absolutePath(`./src/database/last-inserted-entry-id.json`);
 
     try {
       const data = await fs.readFile(filePath, "utf8");
@@ -152,20 +166,25 @@ export class Cebola {
       // Write the JSON string to the file
       await fs.writeFile(filePath, jsonString, "utf8");
 
+      console.log("OLÁ", parsedData.lastInsertedEntryId);
+
       console.log(`Success updating LastInsertedEntryId at ${filePath}`);
+      return true;
     } catch (error) {
       console.log(
         `updateLastInsertedEntryId() - Error updating LastInsertedEntryId JSON file at ${filePath}:`
       );
-      throw new Error(
-        `updateLastInsertedEntryId() - Error updating LastInsertedEntryId JSON file at ${filePath}:`,
-        error.message
-      );
+      return false;
+      /*   throw new Error(
+        `updateLastInsertedEntryId() - Error updating LastInsertedEntryId JSON file at ${filePath}:`
+      ); */
     }
   }
 
   static async getLastInsertedEntryId() {
-    const pathToFile = absolutePath("./database/last-inserted-entry-id.json");
+    const pathToFile = absolutePath(
+      "./src/database/last-inserted-entry-id.json"
+    );
 
     try {
       const data = await fs.readFile(pathToFile, "utf8");
@@ -175,7 +194,7 @@ export class Cebola {
       return parsedData.lastInsertedEntryId;
     } catch (error) {
       console.error(`Error reading JSON file at ${pathToFile}:`, error.message);
-      throw `getLastInsertedEntryId() - ${error}`;
+      return false;
     }
   }
 }
@@ -191,17 +210,13 @@ export class Cebola {
   description: "some description here",
 }); */
 
-Cebola.deleteEntry("nwpxaji7hr2mxbu7akr9e18s");
+/* Cebola.deleteEntry("nwpxaji7hr2mxbu7akr9e18s"); */
 
 // Utils
 function absolutePath(relativeFilePath: string) {
   try {
-    // Convert import.meta.url to a file path
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
+    const absoluteFilePath = path.resolve(relativeFilePath);
 
-    // Construct the absolute file path
-    const absoluteFilePath = path.join(__dirname, relativeFilePath);
     return absoluteFilePath;
   } catch {
     console.log("absolutePath() - Failed to calculate absolute path.");

@@ -15,6 +15,10 @@
     }
   },
   "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
     // typescript options here
     "module": "NodeNext",
     "moduleResolution": "NodeNext"
