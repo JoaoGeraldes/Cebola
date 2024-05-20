@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import { Entry } from "./database-model.js";
+import { DatabaseState, Entry } from "./database-model.js";
 import { createId } from "@paralleldrive/cuid2";
 
 export class Cebola {
@@ -9,12 +9,41 @@ export class Cebola {
     obj: Omit<Entry, "date" | "previousEntryId" | "nextEntryId" | "keywords">,
     _id: string | null = null
   ) {
+    if (!obj)
+      throw new Error("createEntry() - Missing data. Can't create entry!");
+
     const uniqueID = _id ? _id : createId();
     const filePath = absolutePath(`./src/database/entries/${uniqueID}.json`);
+    const lastInsertedEntryId = await this.getLastInsertedEntryId();
 
+    const originalDatabaseStateFile = "./src/database/database_state.json";
+    const originalEntryFile = `./src/database/entries/${lastInsertedEntryId}.json`;
+    const temporaryDatabaseStateFile =
+      "./src/database/database_state_temp.json";
+    const temporaryEntryFile = `./src/database/entries/${lastInsertedEntryId}_temp.json`;
+    /* --------------------------------*/
+    /* -------- CREATE BACKUPS --------*/
+    /* --------------------------------*/
     try {
-      const lastInsertedEntryId = await this.getLastInsertedEntryId();
+      // Create backup of previous entry before modification
+      if (lastInsertedEntryId) {
+        await this.copyFile(originalEntryFile, temporaryEntryFile);
+      }
 
+      // Create backup of the database_state.json file
+      await this.copyFile(
+        originalDatabaseStateFile,
+        temporaryDatabaseStateFile
+      );
+    } catch (error) {
+      console.log("createEntry() - failed to create backups.");
+      throw error;
+    }
+
+    /* ------------------------------*/
+    /* -------- CREATE ENTRY --------*/
+    /* ------------------------------*/
+    try {
       // Prepare Entry structure to be stored
       const newEntry: Entry = {
         domain: obj.domain,
@@ -43,17 +72,21 @@ export class Cebola {
         });
       }
 
-      // Update the lastInsertedEntryId to last-inserted-entry-id.json
+      // Update the lastInsertedEntryId to database_state.json
       await this.updateLastInsertedEntryId(uniqueID);
+
+      // Remove previously created temporary (backup) files.
+      await this.deleteFile(temporaryDatabaseStateFile);
+      await this.deleteFile(temporaryEntryFile);
 
       console.log(`JSON file created successfully at ${filePath}`);
       return true;
     } catch (error) {
-      console.error(`Error creating JSON file at ${filePath}:`, error.message);
-      return false;
-      /*   throw new Error(
-        `createEntry() - Error creating JSON file at ${filePath}:`
-      ); */
+      console.error(
+        `createEntry() - Error creating JSON file at ${filePath}:`,
+        error.message
+      );
+      throw error;
     }
   }
 
@@ -92,7 +125,7 @@ export class Cebola {
       return true;
     } catch (error) {
       console.log(`updateEntry() - Error updating JSON file at ${filePath}:`);
-      return false;
+      throw error;
     }
   }
 
@@ -143,22 +176,25 @@ export class Cebola {
         `deleteEntry() - Error deleting JSON file at ${absoluteFilePath}:`,
         error.message
       );
-      throw new Error(`Error deleting JSON file`);
+      throw error;
     }
   }
 
   static async updateLastInsertedEntryId(newId: string | null) {
-    const filePath = absolutePath(`./src/database/last-inserted-entry-id.json`);
-
+    const filePath = absolutePath(`./src/database/database_state.json`);
     try {
-      const data = await fs.readFile(filePath, "utf8");
-      const parsedData: Record<"lastInsertedEntryId", null | string> =
-        JSON.parse(data);
+      if (!newId) {
+        throw new Error("Missing newId on updateLastInsertedEntryId()");
+      }
 
-      parsedData.lastInsertedEntryId = newId;
+      const data = await fs.readFile(filePath, "utf8");
+      const parsedData: DatabaseState = JSON.parse(data);
+
+      // Update with the latest entry id
+      const newData: DatabaseState = { ...parsedData, last_entry_id: newId };
 
       // Convert the object to a JSON string
-      const jsonString = JSON.stringify(parsedData, null, 2);
+      const jsonString = JSON.stringify(newData, null, 2);
 
       // Ensure the directory exists
       await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -166,35 +202,47 @@ export class Cebola {
       // Write the JSON string to the file
       await fs.writeFile(filePath, jsonString, "utf8");
 
-      console.log("OLÁ", parsedData.lastInsertedEntryId);
-
       console.log(`Success updating LastInsertedEntryId at ${filePath}`);
       return true;
     } catch (error) {
       console.log(
         `updateLastInsertedEntryId() - Error updating LastInsertedEntryId JSON file at ${filePath}:`
       );
-      return false;
-      /*   throw new Error(
-        `updateLastInsertedEntryId() - Error updating LastInsertedEntryId JSON file at ${filePath}:`
-      ); */
+      throw error;
     }
   }
 
   static async getLastInsertedEntryId() {
-    const pathToFile = absolutePath(
-      "./src/database/last-inserted-entry-id.json"
-    );
+    const pathToFile = absolutePath("./src/database/database_state.json");
 
     try {
       const data = await fs.readFile(pathToFile, "utf8");
-      const parsedData: Record<"lastInsertedEntryId", null | string> =
-        JSON.parse(data);
+      const parsedData: DatabaseState = JSON.parse(data);
 
-      return parsedData.lastInsertedEntryId;
+      return parsedData.last_entry_id;
     } catch (error) {
       console.error(`Error reading JSON file at ${pathToFile}:`, error.message);
       return false;
+    }
+  }
+
+  static async copyFile(source: string, destination: string) {
+    try {
+      await fs.copyFile(source, destination);
+      console.log(`${source} was copied to ${destination}`);
+      return true;
+    } catch (error) {
+      console.error("Error copying file:", error);
+    }
+  }
+
+  static async deleteFile(filePath: string) {
+    try {
+      await fs.unlink(filePath);
+      console.log(`${filePath} was deleted successfully`);
+      return true;
+    } catch (error) {
+      console.error("Error deleting file:", error);
     }
   }
 }

@@ -50,10 +50,12 @@ Data structures and sorting algorithms must be optimized for quick searches, and
 **IMPORTANT**: When removing an entry, the property of the _Entry_ should also be removed from the keywords file where it is present. Once a file is created for a keyword (ie: `banana.json` for the word _banana_) should be kept in storage, even though it might become empty `{}`
 
 ### Use-cases while inserting a new entry:
+
 1. It's the very first item:
    - creates an entry, where previous is `null` and next is `null`
 1. It's the last item (any entry being inserted is always the last):
    - updates previous entry to point to this last entry. Current entry next points to `null`.
+1. A fallback should be in place in case of an insertion or deletion goes wrong. The updates to the database must be atomic, if anything fails within the chain of an insertion or deletion, the system must rollback to previous state before the failure. Before each insertion, update or delete we must create copy of the `/database/database_state.json` and as many `/database/entries/<entry-id>.json` files as required on each action. Each action can touch (modify) up to 3 files.
 
 ### Use-cases while removing an entry:
 
@@ -66,6 +68,7 @@ Data structures and sorting algorithms must be optimized for quick searches, and
 - Has to update the entries on the left, and right to new `previousEntryId` and `nextEntryId`.
 
 1. It's the very last entry:
+
 - updates the previous entry to point to next (`nextEntryId`) `null`.
 
 ```js

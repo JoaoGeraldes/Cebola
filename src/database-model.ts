@@ -19,4 +19,9 @@ export interface Entry {
   nextEntryId: string | null;
 }
 
+export interface DatabaseState {
+  last_entry_id: string;
+  first_entry_id?: string;
+}
+
 const example = {};

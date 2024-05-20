@@ -1,8 +1,6 @@
 import { Cebola } from "../index.ts";
 import fs from "fs";
-import { before } from "node:test";
 import path from "path";
-import { Entry } from "../database-model.ts";
 
 const dummyEntryIds = ["entry1", "entry2", "entry3"];
 
