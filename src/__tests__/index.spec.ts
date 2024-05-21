@@ -5,11 +5,6 @@ import path from "path";
 const dummyEntryIds = ["entry1", "entry2", "entry3"];
 
 describe("Add and remove entries and test their connections - pointers", () => {
-  it("Should delete all entries from /database/entries", async () => {
-    const hasDeletedAll = await Cebola.updateLastInsertedEntryId(null);
-    expect(hasDeletedAll).toBe(true);
-  });
-
   it("Should create 3 new entries.", async () => {
     const dummyEntry = {
       domain: undefined,
@@ -20,9 +15,12 @@ describe("Add and remove entries and test their connections - pointers", () => {
       keywords: undefined,
     };
 
-    for (const entryId of dummyEntryIds) {
+    for await (const entryId of dummyEntryIds) {
       await Cebola.createEntry(dummyEntry, entryId);
     }
+
+    const entriesCount = await filesInDirectoryCount("./src/database/entries");
+    expect(entriesCount).toBe(3);
   });
 
   it("Should have the right pointers on each entry.", async () => {
@@ -53,6 +51,16 @@ describe("Add and remove entries and test their connections - pointers", () => {
       }
     }
   });
+
+  it("Should delete all entries from /database/entries", async () => {
+    await Cebola.updateLastInsertedEntryId(null);
+    /* const hasDeletedAll = await deleteAllEntries();
+    expect(hasDeletedAll).toBe(true); */
+
+    for (const id of dummyEntryIds) {
+      await Cebola.deleteEntry(id);
+    }
+  });
 });
 
 // Utils
@@ -71,19 +79,40 @@ async function deleteAllEntries() {
         reject(false);
       }
 
+      for (const file of files) {
+        const filePath = path.join(absoluteFilePath, file);
+        const totalFiles = files.length;
+        let filesDeleted = 0;
+
+        // Delete the file
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(`Error deleting file: ${err}`);
+            reject(false);
+            return;
+          }
+          console.log(`Deleted file: ${filePath}`);
+        });
+
+        if (filesDeleted >= totalFiles) {
+          resolve(true);
+        }
+      }
+
       // Iterate over each file in the directory
-      files.forEach((file) => {
+      /*     files.forEach((file) => {
         const filePath = path.join(absoluteFilePath, file);
 
         // Delete the file
         fs.unlink(filePath, (err) => {
           if (err) {
             console.error(`Error deleting file: ${err}`);
+            reject(false);
             return;
           }
           console.log(`Deleted file: ${filePath}`);
         });
-      });
+      }); */
 
       resolve(true);
     });
@@ -94,3 +123,16 @@ async function deleteAllEntries() {
  * Deletes all files within /entries
  */
 function resetLastInsertedEntryId() {}
+
+async function filesInDirectoryCount(directory: string) {
+  return new Promise((resolve, reject) => {
+    fs.readdir("./src/database/entries", (err, files) => {
+      if (err) {
+        console.log(err);
+        reject(false);
+      } else {
+        resolve(files.length);
+      }
+    });
+  });
+}

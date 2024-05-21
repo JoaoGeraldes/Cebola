@@ -17,17 +17,18 @@ export class Cebola {
     const lastInsertedEntryId = await this.getLastInsertedEntryId();
 
     const originalDatabaseStateFile = "./src/database/database_state.json";
-    const originalEntryFile = `./src/database/entries/${lastInsertedEntryId}.json`;
     const temporaryDatabaseStateFile =
       "./src/database/database_state_temp.json";
-    const temporaryEntryFile = `./src/database/entries/${lastInsertedEntryId}_temp.json`;
+
+    const previousEntryFile = `./src/database/entries/${lastInsertedEntryId}.json`;
+    const temporaryPreviousEntryFile = `./src/database/entries/${lastInsertedEntryId}_temp.json`;
     /* --------------------------------*/
     /* -------- CREATE BACKUPS --------*/
     /* --------------------------------*/
     try {
       // Create backup of previous entry before modification
       if (lastInsertedEntryId) {
-        await this.copyFile(originalEntryFile, temporaryEntryFile);
+        await this.copyFile(previousEntryFile, temporaryPreviousEntryFile);
       }
 
       // Create backup of the database_state.json file
@@ -77,7 +78,7 @@ export class Cebola {
 
       // Remove previously created temporary (backup) files.
       await this.deleteFile(temporaryDatabaseStateFile);
-      await this.deleteFile(temporaryEntryFile);
+      await this.deleteFile(temporaryPreviousEntryFile);
 
       console.log(`JSON file created successfully at ${filePath}`);
       return true;
@@ -130,20 +131,81 @@ export class Cebola {
   }
 
   static async deleteEntry(entryId: string) {
-    const absoluteFilePath = absolutePath(`/database/entries/${entryId}.json`);
+    if (!entryId) {
+      throw new Error(`deleteEntry() - Invalid entryId -> ${entryId}`);
+    }
 
+    const entryToBeDeletedFilePath = absolutePath(
+      `./src/database/entries/${entryId}.json`
+    );
+
+    const entryToBeDeletedJson = await fs.readFile(
+      entryToBeDeletedFilePath,
+      "utf8"
+    );
+    const entryToBeDeleted: Partial<Entry> = JSON.parse(entryToBeDeletedJson);
+
+    const isTheFirstEntry = !entryToBeDeleted.previousEntryId; // Head
+    const isTheLastEntry = !entryToBeDeleted.nextEntryId; // Tail
+    const previousEntryId = entryToBeDeleted.previousEntryId;
+    const nextEntryId = entryToBeDeleted.nextEntryId;
+    const isTheOnlyEntry = !previousEntryId && !nextEntryId;
+
+    /* --------------------------------*/
+    /* -------- CREATE BACKUPS --------*/
+    /* --------------------------------*/
     try {
-      const entryToBeDeletedJson = await fs.readFile(absoluteFilePath, "utf8");
-      const entryToBeDeleted: Partial<Entry> = JSON.parse(entryToBeDeletedJson);
+      const originalDatabaseStateFile = "./src/database/database_state.json";
 
-      const isTheFirstEntry = !entryToBeDeleted.previousEntryId; // Head
-      const isTheLastEntry = !entryToBeDeleted.nextEntryId; // Tail
-      const previousEntryId = entryToBeDeleted.previousEntryId;
-      const nextEntryId = entryToBeDeleted.nextEntryId;
-      const isTheOnlyEntry = !previousEntryId && !nextEntryId;
+      const originalEntryFile = `./src/database/entries/${entryId}.json`;
+      const temporaryEntryFile = `./src/database/entries/${entryId}_temp.json`;
 
+      const originalPreviousEntryFile = `./src/database/entries/${entryToBeDeleted.nextEntryId}.json`;
+      const temporaryPreviousEntryFile = `./src/database/entries/${entryToBeDeleted.nextEntryId}_temp.json`;
+
+      const originalNextEntryFile = `./src/database/entries/${entryToBeDeleted.nextEntryId}.json`;
+      const temporaryNextEntryFile = `./src/database/entries/${entryToBeDeleted.nextEntryId}_temp.json`;
+
+      const temporaryDatabaseStateFile =
+        "./src/database/database_state_temp.json";
+
+      await this.copyFile(
+        originalDatabaseStateFile,
+        temporaryDatabaseStateFile
+      );
+      await this.copyFile(originalEntryFile, temporaryEntryFile);
+
+      if (isTheFirstEntry && !isTheOnlyEntry) {
+        await this.copyFile(originalNextEntryFile, temporaryNextEntryFile);
+        await this.updateEntry(nextEntryId, { previousEntryId: null });
+      }
+
+      if (isTheLastEntry && !isTheOnlyEntry) {
+        await this.copyFile(
+          originalPreviousEntryFile,
+          temporaryPreviousEntryFile
+        );
+        await this.updateEntry(previousEntryId, { nextEntryId: null });
+        await this.updateLastInsertedEntryId(previousEntryId);
+      }
+
+      // Create backup of the database_state.json file
+      await this.copyFile(
+        originalDatabaseStateFile,
+        temporaryDatabaseStateFile
+      );
+    } catch (error) {
+      console.log("createEntry() - failed to create backups.");
+      throw error;
+    }
+
+    /* ------------------------*/
+    /* -------- DELETE --------*/
+    /* ------------------------*/
+    try {
       // Delete the file
-      await fs.unlink(absoluteFilePath);
+      console.log("BEFORE UNLINK FILE:", entryToBeDeletedFilePath);
+      await fs.unlink(entryToBeDeletedFilePath);
 
       // Update entries linked to this one being deleted
       // Use-cases:
@@ -170,10 +232,12 @@ export class Cebola {
           previousEntryId: previousEntryId,
         });
       }
-      console.log(`JSON file deleted successfully at ${absoluteFilePath}`);
+      console.log(
+        `JSON file deleted successfully at ${entryToBeDeletedFilePath}`
+      );
     } catch (error) {
       console.error(
-        `deleteEntry() - Error deleting JSON file at ${absoluteFilePath}:`,
+        `deleteEntry() - Error deleting JSON file at ${entryToBeDeletedFilePath}:`,
         error.message
       );
       throw error;
@@ -183,7 +247,7 @@ export class Cebola {
   static async updateLastInsertedEntryId(newId: string | null) {
     const filePath = absolutePath(`./src/database/database_state.json`);
     try {
-      if (!newId) {
+      if (newId === undefined) {
         throw new Error("Missing newId on updateLastInsertedEntryId()");
       }
 
