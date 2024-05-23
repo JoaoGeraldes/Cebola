@@ -58,6 +58,7 @@ describe("Add and remove entries and test their connections - pointers", () => {
     expect(hasDeletedAll).toBe(true); */
 
     for (const id of dummyEntryIds) {
+      console.log("HERHERHERHERHERHERHERHERHERHRER", id);
       await Cebola.deleteEntry(id);
     }
   });

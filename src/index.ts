@@ -78,7 +78,9 @@ export class Cebola {
 
       // Remove previously created temporary (backup) files.
       await this.deleteFile(temporaryDatabaseStateFile);
-      await this.deleteFile(temporaryPreviousEntryFile);
+      if (lastInsertedEntryId) {
+        await this.deleteFile(temporaryPreviousEntryFile);
+      }
 
       console.log(`JSON file created successfully at ${filePath}`);
       return true;
@@ -145,11 +147,11 @@ export class Cebola {
     );
     const entryToBeDeleted: Partial<Entry> = JSON.parse(entryToBeDeletedJson);
 
-    const isTheFirstEntry = !entryToBeDeleted.previousEntryId; // Head
-    const isTheLastEntry = !entryToBeDeleted.nextEntryId; // Tail
+    const isTheFirstEntry = entryToBeDeleted.previousEntryId === null; // Head
+    const isTheLastEntry = entryToBeDeleted.nextEntryId === null; // Tail
     const previousEntryId = entryToBeDeleted.previousEntryId;
     const nextEntryId = entryToBeDeleted.nextEntryId;
-    const isTheOnlyEntry = !previousEntryId && !nextEntryId;
+    const isTheOnlyEntry = !!previousEntryId && !!nextEntryId;
 
     /* --------------------------------*/
     /* -------- CREATE BACKUPS --------*/
@@ -160,8 +162,8 @@ export class Cebola {
       const originalEntryFile = `./src/database/entries/${entryId}.json`;
       const temporaryEntryFile = `./src/database/entries/${entryId}_temp.json`;
 
-      const originalPreviousEntryFile = `./src/database/entries/${entryToBeDeleted.nextEntryId}.json`;
-      const temporaryPreviousEntryFile = `./src/database/entries/${entryToBeDeleted.nextEntryId}_temp.json`;
+      const originalPreviousEntryFile = `./src/database/entries/${entryToBeDeleted.previousEntryId}.json`;
+      const temporaryPreviousEntryFile = `./src/database/entries/${entryToBeDeleted.previousEntryId}_temp.json`;
 
       const originalNextEntryFile = `./src/database/entries/${entryToBeDeleted.nextEntryId}.json`;
       const temporaryNextEntryFile = `./src/database/entries/${entryToBeDeleted.nextEntryId}_temp.json`;
@@ -173,7 +175,10 @@ export class Cebola {
         originalDatabaseStateFile,
         temporaryDatabaseStateFile
       );
-      await this.copyFile(originalEntryFile, temporaryEntryFile);
+
+      if (isTheFirstEntry && isTheOnlyEntry) {
+        await this.copyFile(originalEntryFile, temporaryEntryFile);
+      }
 
       if (isTheFirstEntry && !isTheOnlyEntry) {
         await this.copyFile(originalNextEntryFile, temporaryNextEntryFile);
@@ -188,14 +193,8 @@ export class Cebola {
         await this.updateEntry(previousEntryId, { nextEntryId: null });
         await this.updateLastInsertedEntryId(previousEntryId);
       }
-
-      // Create backup of the database_state.json file
-      await this.copyFile(
-        originalDatabaseStateFile,
-        temporaryDatabaseStateFile
-      );
     } catch (error) {
-      console.log("createEntry() - failed to create backups.");
+      console.log("deleteEntry() - failed to create backups.");
       throw error;
     }
 
@@ -204,28 +203,21 @@ export class Cebola {
     /* ------------------------*/
     try {
       // Delete the file
-      console.log("BEFORE UNLINK FILE:", entryToBeDeletedFilePath);
       await fs.unlink(entryToBeDeletedFilePath);
 
-      // Update entries linked to this one being deleted
-      // Use-cases:
-      //  1. Is the first entry, but has more entries.
       if (isTheFirstEntry && !isTheOnlyEntry) {
         await this.updateEntry(nextEntryId, { previousEntryId: null });
       }
 
-      //  2. Only has one entry (has no previous nor next entry pointer)
       if (isTheOnlyEntry) {
         await this.updateLastInsertedEntryId(null);
       }
 
-      //  3. Has multiple entries and this is the last entry (only has the previous entry pointer)
       if (isTheLastEntry && !isTheOnlyEntry) {
         await this.updateEntry(previousEntryId, { nextEntryId: null });
         await this.updateLastInsertedEntryId(previousEntryId);
       }
 
-      //  4. This is somewhere in the middle (has previous and next entry pointers)
       if (!isTheLastEntry && !isTheOnlyEntry) {
         await this.updateEntry(previousEntryId, { nextEntryId: nextEntryId });
         await this.updateEntry(nextEntryId, {
@@ -335,3 +327,33 @@ function absolutePath(relativeFilePath: string) {
     throw new Error("Failed to calculate absolute path.");
   }
 }
+
+/* Cebola.createEntry(
+  {
+    domain: "entry1",
+    password: "entry1",
+    username: "entry1",
+    description: "entry1",
+  },
+  "entry1"
+).then(() => {
+  Cebola.createEntry(
+    {
+      domain: "entry2",
+      password: "entry2",
+      username: "entry2",
+      description: "entry2",
+    },
+    "entry2"
+  ).then(() => {
+    Cebola.createEntry(
+      {
+        domain: "entry3",
+        password: "entry3",
+        username: "entry3",
+        description: "entry3",
+      },
+      "entry3"
+    );
+  });
+}); */
