@@ -1,11 +1,18 @@
 import { Cebola } from "../index.ts";
 import fs from "fs";
 import path from "path";
+import { Entry } from "../database-model.ts";
+import { before } from "node:test";
 
 const dummyEntryIds = ["entry1", "entry2", "entry3"];
 
-describe("Add and remove entries and test their connections - pointers", () => {
-  it("Should create 3 new entries.", async () => {
+describe("Create, delete, in ascending order, and verify entry's connections.", () => {
+  it("Should delete all entries and backups before proceed...", async () => {
+    const hasDeletedAll = await deleteAllEntries();
+    expect(hasDeletedAll).toBe(true);
+  });
+
+  it("Should create 6 files (3 new entries + 2 backup files).", async () => {
     const dummyEntry = {
       domain: undefined,
       password: undefined,
@@ -13,14 +20,14 @@ describe("Add and remove entries and test their connections - pointers", () => {
       description: undefined,
       date: undefined,
       keywords: undefined,
+      tail: undefined,
     };
-
     for await (const entryId of dummyEntryIds) {
       await Cebola.createEntry(dummyEntry, entryId);
     }
 
     const entriesCount = await filesInDirectoryCount("./src/database/entries");
-    expect(entriesCount).toBe(3);
+    expect(entriesCount).toBe(5);
   });
 
   it("Should have the right pointers on each entry.", async () => {
@@ -53,12 +60,7 @@ describe("Add and remove entries and test their connections - pointers", () => {
   });
 
   it("Should delete all entries from /database/entries", async () => {
-    await Cebola.updateLastInsertedEntryId(null);
-    /* const hasDeletedAll = await deleteAllEntries();
-    expect(hasDeletedAll).toBe(true); */
-
     for (const id of dummyEntryIds) {
-      console.log("HERHERHERHERHERHERHERHERHERHRER", id);
       await Cebola.deleteEntry(id);
     }
   });

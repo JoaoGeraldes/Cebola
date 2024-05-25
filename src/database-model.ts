@@ -17,6 +17,8 @@ export interface Entry {
   keywords: string[];
   previousEntryId: string | null;
   nextEntryId: string | null;
+  tail: string | null;
+  head?: string | null;
 }
 
 export interface DatabaseState {
