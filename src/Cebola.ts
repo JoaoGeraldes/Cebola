@@ -5,6 +5,7 @@ import path from "path";
 import { createId } from "@paralleldrive/cuid2";
 import { absolutePath, copyFile, deleteFile } from "./utils/utils.ts";
 import { Entry } from "./types/types.ts";
+import { relativePath } from "./config.ts";
 
 export class Cebola {
   static async createEntry(
@@ -16,7 +17,7 @@ export class Cebola {
 
     const uniqueID = _id ? _id : createId();
     const filePath = absolutePath(`./src/database/entries/${uniqueID}.json`);
-    const headFilePath = absolutePath(`./src/database/entries/tail.json`);
+    const tailFilePath = absolutePath(relativePath.tail);
     const lastInsertedEntryId = await this.getTailId();
 
     if (lastInsertedEntryId) {
@@ -44,7 +45,7 @@ export class Cebola {
       await fs.writeFile(filePath, jsonString, "utf8");
 
       // Create copy for linked list Head
-      await fs.writeFile(headFilePath, jsonString, "utf8");
+      await fs.writeFile(tailFilePath, jsonString, "utf8");
 
       // Link previous entry to this new entry
       if (lastInsertedEntryId) {
@@ -64,7 +65,7 @@ export class Cebola {
   }
 
   static async getEntry(entryId: string) {
-    const filePath = absolutePath(`./src/database/entries/${entryId}.json`);
+    const filePath = absolutePath(relativePath.entry(entryId));
 
     try {
       const entryJson = await fs.readFile(filePath, "utf8");
@@ -81,7 +82,7 @@ export class Cebola {
       throw new Error("updateEntry() - Missing entryId or updates.");
     }
 
-    const filePath = absolutePath(`./src/database/entries/${entryId}.json`);
+    const filePath = absolutePath(relativePath.entry(entryId));
 
     await this.smartBackup(entryId);
 
@@ -111,7 +112,7 @@ export class Cebola {
     try {
       // Create copy for linked list Head
       await fs.writeFile(
-        absolutePath(`./src/database/entries/tail.json`),
+        absolutePath(relativePath.tail),
         JSON.stringify(entry),
         "utf8"
       );
@@ -126,12 +127,10 @@ export class Cebola {
       throw new Error(`deleteEntry() - Invalid entryId -> ${entryId}`);
     }
 
-    const entryToBeDeletedFilePath = absolutePath(
-      `./src/database/entries/${entryId}.json`
-    );
+    const entryToBeDeletedFilePath = absolutePath(relativePath.entry(entryId));
 
     const entryJSON = await fs.readFile(
-      absolutePath(`./src/database/entries/${entryId}.json`),
+      absolutePath(relativePath.entry(entryId)),
       "utf8"
     );
     const entry: Partial<Entry> = JSON.parse(entryJSON);
@@ -187,7 +186,7 @@ export class Cebola {
   static async getTailId(): Promise<string | null> {
     return new Promise(async (resolve, reject) => {
       try {
-        const filePath = absolutePath(`./src/database/entries/tail.json`);
+        const filePath = absolutePath(relativePath.tail);
         const fileContent = await fs.readFile(filePath, { encoding: "utf8" });
         const data: Entry = JSON.parse(fileContent);
 
@@ -197,7 +196,7 @@ export class Cebola {
           resolve(null);
         }
       } catch (err) {
-        reject(null);
+        resolve(null);
         console.error(err);
       }
     });
@@ -214,7 +213,7 @@ export class Cebola {
       if (!entryId) throw new Error("Missing entry ID");
 
       const entryJSON = await fs.readFile(
-        absolutePath(`./src/database/entries/${entryId}.json`),
+        absolutePath(relativePath.entry(entryId)),
         "utf8"
       );
 
@@ -222,20 +221,20 @@ export class Cebola {
 
       const filesPath = {
         tailFile: {
-          original: `./src/database/entries/tail.json`,
-          backup: `./src/database/entries/tail_backup.json`,
+          original: relativePath.tail,
+          backup: relativePath.tailBackup,
         },
         entryFile: {
-          original: `./src/database/entries/${entryId}.json`,
-          backup: `./src/database/entries/${entryId}_backup.json`,
+          original: relativePath.entry(entryId),
+          backup: relativePath.entryBackup(entryId),
         },
         previousEntryFile: {
           original: `./src/database/entries/${entry.previousEntryId}.json`,
-          backup: `./src/database/entries/${entry.previousEntryId}_backup.json`,
+          backup: relativePath.entryBackup(entry.previousEntryId),
         },
         nextEntryFile: {
           original: `./src/database/entries/${entry.nextEntryId}.json`,
-          backup: `./src/database/entries/${entry.nextEntryId}_backup.json`,
+          backup: relativePath.entryBackup(entry.nextEntryId),
         },
       };
 
@@ -308,27 +307,23 @@ export class Cebola {
   static async recoverFromSmartBackup(entryId: string) {
     try {
       const entryJSON = await fs.readFile(
-        absolutePath(`./src/database/entries/${entryId}.json`),
+        absolutePath(relativePath.entry(entryId)),
         "utf8"
       );
       const entry: Partial<Entry> = JSON.parse(entryJSON);
 
       const filesPath = {
-        databaseStateFile: {
-          original: "./src/database/database_state.json",
-          backup: "./src/database/database_state_backup.json",
-        },
         entryFile: {
-          original: `./src/database/entries/${entryId}.json`,
-          backup: `./src/database/entries/${entryId}_backup.json`,
+          original: relativePath.entry(entryId),
+          backup: relativePath.entryBackup(entryId),
         },
         previousEntryFile: {
           original: `./src/database/entries/${entry.previousEntryId}.json`,
-          backup: `./src/database/entries/${entry.previousEntryId}_backup.json`,
+          backup: relativePath.entryBackup(entry.previousEntryId),
         },
         nextEntryFile: {
           original: `./src/database/entries/${entry.nextEntryId}.json`,
-          backup: `./src/database/entries/${entry.nextEntryId}_backup.json`,
+          backup: relativePath.entryBackup(entry.nextEntryId),
         },
       };
 
@@ -402,20 +397,20 @@ export class Cebola {
       if (!entryId) return;
 
       const entryJSON = await fs.readFile(
-        absolutePath(`./src/database/entries/${entryId}.json`),
+        absolutePath(relativePath.entry(entryId)),
         "utf8"
       );
       const entry: Partial<Entry> = JSON.parse(entryJSON);
 
       const filesPath = {
         entryFile: {
-          backup: `./src/database/entries/${entryId}_backup.json`,
+          backup: relativePath.entryBackup(entryId),
         },
         previousEntryFile: {
-          backup: `./src/database/entries/${entry.previousEntryId}_backup.json`,
+          backup: relativePath.entryBackup(entry.previousEntryId),
         },
         nextEntryFile: {
-          backup: `./src/database/entries/${entry.nextEntryId}_backup.json`,
+          backup: relativePath.entryBackup(entry.nextEntryId),
         },
       };
 
