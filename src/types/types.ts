@@ -1,8 +1,6 @@
-// Each entry is stored in a directory with unique name (hashed)
-
-interface DatabaseModel {}
-
 export interface Entry {
+  /** Should correspond to the file's name i.e.: (`entryId123.json` should contain an id of `entryId123`) */
+  id: string;
   domain: string;
   description?: string;
   /**
@@ -17,13 +15,4 @@ export interface Entry {
   keywords: string[];
   previousEntryId: string | null;
   nextEntryId: string | null;
-  tail: string | null;
-  head?: string | null;
 }
-
-export interface DatabaseState {
-  last_entry_id: string;
-  first_entry_id?: string;
-}
-
-const example = {};

@@ -1,8 +1,7 @@
 {
-  "nextEntryId": null,
-  "previousEntryId": null,
-  "date": "2024-05-25T23:02:35.935Z",
-  "keywords": [],
-  "tail": "entry3",
-  "head": null
+  "id": "entry3",
+  "nextEntryId": "entry4",
+  "previousEntryId": "entry2",
+  "date": "2024-05-26T11:53:45.658Z",
+  "keywords": []
 }
