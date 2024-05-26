@@ -16,7 +16,7 @@ export class Cebola {
       throw new Error("createEntry() - Missing data. Can't create entry!");
 
     const uniqueID = _id ? _id : createId();
-    const filePath = absolutePath(`./src/database/entries/${uniqueID}.json`);
+    const filePath = absolutePath(relativePath.entry(uniqueID));
     const tailFilePath = absolutePath(relativePath.tail);
     const lastInsertedEntryId = await this.getTailId();
 
@@ -229,11 +229,11 @@ export class Cebola {
           backup: relativePath.entryBackup(entryId),
         },
         previousEntryFile: {
-          original: `./src/database/entries/${entry.previousEntryId}.json`,
+          original: relativePath.entry(entry.previousEntryId),
           backup: relativePath.entryBackup(entry.previousEntryId),
         },
         nextEntryFile: {
-          original: `./src/database/entries/${entry.nextEntryId}.json`,
+          original: relativePath.entryBackup(entry.nextEntryId),
           backup: relativePath.entryBackup(entry.nextEntryId),
         },
       };
@@ -318,11 +318,11 @@ export class Cebola {
           backup: relativePath.entryBackup(entryId),
         },
         previousEntryFile: {
-          original: `./src/database/entries/${entry.previousEntryId}.json`,
+          original: relativePath.entry(entry.previousEntryId),
           backup: relativePath.entryBackup(entry.previousEntryId),
         },
         nextEntryFile: {
-          original: `./src/database/entries/${entry.nextEntryId}.json`,
+          original: relativePath.entryBackup(entry.nextEntryId),
           backup: relativePath.entryBackup(entry.nextEntryId),
         },
       };

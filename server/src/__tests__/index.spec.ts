@@ -1,6 +1,8 @@
 import { Cebola } from "../Cebola.ts";
 import fs from "fs";
 import path from "path";
+import { relativePath } from "../config.ts";
+import { absolutePath } from "../utils/utils.ts";
 
 const dummyEntryIds = ["entry1", "entry2", "entry3"];
 const dummyEntryIds2 = [
@@ -37,7 +39,7 @@ describe("3 ENTRIES SUITE", () => {
       await Cebola.createEntry(dummyEntry, entryId);
     }
 
-    const entriesCount = await filesInDirectoryCount("./src/database/entries");
+    const entriesCount = await filesInDirectoryCount(relativePath.entries);
     expect(entriesCount).toBe(7);
   });
 
@@ -98,7 +100,7 @@ describe("10 ENTRIES SUITE", () => {
       await Cebola.createEntry(dummyEntry, entryId);
     }
 
-    const entriesCount = await filesInDirectoryCount("./src/database/entries");
+    const entriesCount = await filesInDirectoryCount(relativePath.entries);
     expect(entriesCount).toBe(21);
   });
 
@@ -171,18 +173,19 @@ describe("10 ENTRIES SUITE", () => {
  */
 async function deleteAllEntries() {
   return new Promise((resolve, reject) => {
-    const relativeFilePath = "./src/database/entries/";
-    const absoluteFilePath = path.resolve(relativeFilePath);
+    const entriesRelativePath = relativePath.entries;
+    /* const absoluteEntriesPath = path.resolve(entriesRelativePath); */
+    const absoluteEntriesPath = absolutePath(entriesRelativePath);
 
     // Read the contents of the folder
-    fs.readdir(absoluteFilePath, (err, files) => {
+    fs.readdir(absoluteEntriesPath, (err, files) => {
       if (err) {
         console.error(`Error reading directory: ${err}`);
         reject(false);
       }
 
       for (const file of files) {
-        const filePath = path.join(absoluteFilePath, file);
+        const filePath = path.join(absoluteEntriesPath, file);
         const totalFiles = files.length;
         let filesDeleted = 0;
 
@@ -201,21 +204,6 @@ async function deleteAllEntries() {
         }
       }
 
-      // Iterate over each file in the directory
-      /*     files.forEach((file) => {
-        const filePath = path.join(absoluteFilePath, file);
-
-        // Delete the file
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.error(`Error deleting file: ${err}`);
-            reject(false);
-            return;
-          }
-          console.log(`Deleted file: ${filePath}`);
-        });
-      }); */
-
       resolve(true);
     });
   });
@@ -223,7 +211,7 @@ async function deleteAllEntries() {
 
 async function filesInDirectoryCount(directory: string) {
   return new Promise((resolve, reject) => {
-    fs.readdir("./src/database/entries", (err, files) => {
+    fs.readdir(relativePath.entries, (err, files) => {
       if (err) {
         console.log(err);
         reject(false);

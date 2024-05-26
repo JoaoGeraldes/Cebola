@@ -21,6 +21,8 @@
     "ts-node": "^10.9.2"
   },
   "dependencies": {
-    "@paralleldrive/cuid2": "^2.2.2"
+    "@paralleldrive/cuid2": "^2.2.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   }
 }
