@@ -1,5 +1,5 @@
 import { Cebola } from "./Cebola.ts";
-
+import "./api.ts";
 /* Cebola.deleteEntry("nwpxaji7hr2mxbu7akr9e18s"); */
 
 // Utils
@@ -41,8 +41,9 @@ import { Cebola } from "./Cebola.ts";
 }); */
 /* Cebola.deleteEntry("entry1"); */
 
-export async function start_now() {
+/* export async function start_now() {
   const id = await Cebola.getTailId();
   console.log("getTailId", id);
 }
-start_now();
+
+start_now(); */

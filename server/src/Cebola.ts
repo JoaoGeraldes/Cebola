@@ -9,7 +9,10 @@ import { relativePath } from "./config.ts";
 
 export class Cebola {
   static async createEntry(
-    obj: Omit<Entry, "date" | "previousEntryId" | "nextEntryId" | "keywords">,
+    obj: Omit<
+      Entry,
+      "date" | "previousEntryId" | "nextEntryId" | "keywords" | "id"
+    >,
     _id: string | null = null
   ) {
     if (!obj)
