@@ -1,13 +1,7 @@
 import express from "express";
 import cors from "cors";
-import { Entry } from "./types/types.ts";
+import { Entry, RequestPayload } from "./types/types.ts";
 import { Cebola } from "./Cebola.ts";
-
-namespace ClientRequest {
-  export interface Payload {
-    POST: Pick<Entry, "description" | "domain" | "password" | "username">;
-  }
-}
 
 const app = express();
 const PORT = process.env.PORT || 9000;
@@ -18,10 +12,61 @@ app.use(cors());
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+/* -------------------------------- */
+/* --------- GET /entries --------- */
+/* -------------------------------- */
+app.get("/entries", async (req, res) => {
+  const errors = {
+    missingFields: { error: "Missing fields" },
+    internal: { error: "Something went wrong while retrieving entries." },
+  };
+
+  try {
+    const query: RequestPayload.GET.Entries = {
+      entry: req.query.entry as string,
+      length: req.query.length as string,
+    };
+
+    let entry: Partial<Entry> | false = false;
+
+    const entriesToSend: Entry[] = [];
+    const entriesPerPage = parseInt(query.length) || 5;
+
+    if (query.entry) {
+      entry = await Cebola.getEntry(query.entry);
+    } else {
+      const lastEntryId = await Cebola.getTailId();
+      entry = await Cebola.getEntry(lastEntryId);
+    }
+
+    if (entry) {
+      for (let i = 0; i < entriesPerPage; i++) {
+        /* const previous = await Cebola.getEntry(entry.id); */
+
+        entriesToSend.push(entry as Entry);
+
+        if (!entry.previousEntryId) {
+          break;
+        }
+
+        entry = (await Cebola.getEntry(entry.previousEntryId)) as Entry;
+      }
+
+      req.res.status(200).json(entriesToSend);
+      return;
+    }
+
+    req.res.status(200).json(entriesToSend);
+  } catch {
+    req.res.status(500).json(errors.internal);
+  }
+});
+
 /* ------------------------------ */
 /* --------- GET /entry --------- */
 /* ------------------------------ */
 app.get("/entry", (req, res) => {
+  req;
   req.res.send("Hello Worldd!");
 });
 
@@ -35,7 +80,7 @@ app.post("/entry", async (req, res) => {
   };
 
   try {
-    const requestPayload: ClientRequest.Payload["POST"] = req.body;
+    const requestPayload: RequestPayload.POST.Entry["body"] = req.body;
 
     if (hasMissingFields(requestPayload)) {
       req.res.status(404).json(errors.missingFields);
@@ -69,7 +114,7 @@ app.patch("/entry", (req, res) => {
   };
 
   try {
-    const requestPayload: ClientRequest.Payload["POST"] = req.body;
+    const requestPayload: RequestPayload.POST.Entry["body"] = req.body;
 
     if (
       !requestPayload.description &&
@@ -93,7 +138,7 @@ app.listen(PORT, () => {
 });
 
 // Utils
-function hasMissingFields(entry: ClientRequest.Payload["POST"]) {
+function hasMissingFields(entry: RequestPayload.POST.Entry["body"]) {
   try {
     console.log("hasMissingFields", entry);
     if (

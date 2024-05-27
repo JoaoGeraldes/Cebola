@@ -16,3 +16,18 @@ export interface Entry {
   previousEntryId: string | null;
   nextEntryId: string | null;
 }
+
+export namespace RequestPayload {
+  export namespace GET {
+    export interface Entries {
+      length: string;
+      entry: string;
+    }
+  }
+
+  export namespace POST {
+    export interface Entry {
+      body: Pick<Entry, "description" | "domain" | "password" | "username">;
+    }
+  }
+}

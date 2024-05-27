@@ -68,6 +68,10 @@ export class Cebola {
   }
 
   static async getEntry(entryId: string) {
+    if (!entryId) {
+      return;
+    }
+
     const filePath = absolutePath(relativePath.entry(entryId));
 
     try {
@@ -200,7 +204,7 @@ export class Cebola {
         }
       } catch (err) {
         resolve(null);
-        console.error(err);
+        console.log(err);
       }
     });
   }
