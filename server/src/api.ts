@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { Entry, RequestPayload } from "./types/types.ts";
+import { Entry, RequestPayload } from "../../types.ts";
 import { Cebola } from "./Cebola.ts";
 
 const app = express();
@@ -23,7 +23,7 @@ app.get("/entries", async (req, res) => {
 
   try {
     const query: RequestPayload.GET.Entries = {
-      entry: req.query.entry as string,
+      cursor: req.query.cursor as string,
       length: req.query.length as string,
     };
 
@@ -32,8 +32,8 @@ app.get("/entries", async (req, res) => {
     const entriesToSend: Entry[] = [];
     const entriesPerPage = parseInt(query.length) || 5;
 
-    if (query.entry) {
-      entry = await Cebola.getEntry(query.entry);
+    if (query.cursor) {
+      entry = await Cebola.getEntry(query.cursor);
     } else {
       const lastEntryId = await Cebola.getTailId();
       entry = await Cebola.getEntry(lastEntryId);

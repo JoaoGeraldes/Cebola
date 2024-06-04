@@ -4,7 +4,7 @@ import path from "path";
 
 import { createId } from "@paralleldrive/cuid2";
 import { absolutePath, copyFile, deleteFile } from "./utils/utils.ts";
-import { Entry } from "./types/types.ts";
+import { Entry } from "../../types.ts";
 import { relativePath } from "./config.ts";
 
 export class Cebola {

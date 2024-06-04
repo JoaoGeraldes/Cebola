@@ -21,7 +21,7 @@ export namespace RequestPayload {
   export namespace GET {
     export interface Entries {
       length: string;
-      entry: string;
+      cursor: string;
     }
   }
 
