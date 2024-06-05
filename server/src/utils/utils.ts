@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import fs2 from "fs";
 import path from "path";
 
 export async function copyFile(source: string, destination: string) {
@@ -14,6 +15,13 @@ export async function copyFile(source: string, destination: string) {
 
 export async function deleteFile(filePath: string) {
   try {
+    const fileExists = fs2.existsSync(filePath);
+
+    if (!fileExists) {
+      console.log(`${filePath} NOT found. Skipping...`);
+      return;
+    }
+
     await fs.unlink(filePath);
     console.log(`${filePath} was deleted successfully`);
     return true;

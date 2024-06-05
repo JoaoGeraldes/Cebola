@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import "./App.css";
 import { Entry } from "../../types";
+import EntryCard from "./components/Entry";
 
 function App() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
@@ -16,31 +17,47 @@ function App() {
     setCursor(entries[entries.length - 1].id);
   }, [entries]); */
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  useEffect(() => {
+    loadEntries();
+  }, []);
+
+  async function loadEntries() {
     const result = await CebolaClient.getEntries({ cursor: cursor, length: 5 });
 
     if (!result) return;
 
     setEntries(result);
 
-    setCursor(result[result.length - 1].previousEntryId);
+    if (result && result.length > 0) {
+      setCursor(result[result.length - 1].previousEntryId);
+    }
+  }
+
+  async function handleEntryDelete(entryId: string) {
+    try {
+      console.log(entryId);
+      await CebolaClient.deleteEntry(entryId);
+
+      if (entryId === cursor) {
+      }
+    } catch {
+      console.error("Failed to delete entry.");
+    }
   }
 
   return (
     <div className="App">
-      <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="cursor id" />
-        <input type="number" placeholder="results per page" />
-        <button>ok</button>
-      </form>
+      <button onClick={loadEntries}>load</button>
       <h1>Current cursor: {cursor}</h1>
       {entries &&
         entries.map((entry) => (
-          <div>
-            <h3>{entry?.description}</h3> {entry?.date} <br />{" "}
-            <b>id: {entry?.id}</b>
-          </div>
+          <Fragment key={entry.id}>
+            <EntryCard
+              entry={entry}
+              onDelete={() => handleEntryDelete(entry.id)}
+            />
+            <hr />
+          </Fragment>
         ))}
     </div>
   );
@@ -59,36 +76,57 @@ interface Endpoints {
       };
     };
   };
+  DELETE: {
+    entry: {
+      path: string;
+      body: {
+        id: string | null;
+      };
+    };
+  };
+  POST: {
+    entry: {
+      path: string;
+      body: Pick<Entry, "username" | "description" | "domain" | "password">;
+    };
+  };
 }
 class CebolaClient {
-  /*  endpoints: { base: string; GET: { entries: string } }; */
-  /* static endpoints: { base: string; GET: { entries: string } }; */
-
-  static endpoints: Endpoints = {
+  static endpoint = {
     base: "http://localhost:9000",
-    GET: {
-      entries: {
-        path: "/entries",
-        params: {
-          cursor: null,
-          length: null,
-        },
-      },
-    },
+    "/entries": "/entries",
+    "/entry": "/entry",
   };
 
+  static async deleteEntry(entryId: string) {
+    const requestPayload: Endpoints["DELETE"]["entry"]["body"] = {
+      id: entryId,
+    };
+    const url = `${this.endpoint.base}${this.endpoint["/entry"]}`;
+
+    try {
+      console.log("requestPayload ", requestPayload);
+      const response = await fetch(url, {
+        method: "delete",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestPayload),
+      });
+
+      console.log("response", response);
+      return response;
+    } catch {
+      return null;
+    }
+  }
+
   static async getEntries(
-    queryParams: Endpoints["GET"]["entries"]["params"] = this.endpoints.GET
-      .entries.params
+    queryParams: Endpoints["GET"]["entries"]["params"]
   ): Promise<Entry[] | null> {
-    const { base, GET } = this.endpoints;
-
-    /*  Object.keys(this.endpoints.GET.entries.params).forEach((key) => {
-      url += this.endpoints.GET.entries.params[key];
-    }); */
-
     let queryString = this.objectToQueryString(queryParams);
-    const url = `${base}${GET.entries.path}${queryString}`;
+    const url = `${this.endpoint.base}${this.endpoint["/entries"]}${queryString}`;
 
     try {
       const response = await fetch(url);

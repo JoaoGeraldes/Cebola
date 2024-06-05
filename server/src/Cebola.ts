@@ -181,6 +181,9 @@ export class Cebola {
         default:
           break;
       }
+
+      // Delete backups after entry deletion is successful
+      await deleteFile(relativePath.entryBackup(entryId));
     } catch (error) {
       console.error(
         `deleteEntry() - Error deleting JSON file at ${entryToBeDeletedFilePath}:`,
@@ -420,8 +423,9 @@ export class Cebola {
           backup: relativePath.entryBackup(entry.nextEntryId),
         },
       };
-
+      console.log("ATTEEMMPT TO DELETE", filesPath.entryFile.backup)
       await deleteFile(filesPath.entryFile.backup);
+     
     } catch (error) {
       console.log(
         "smartBackupDelete() - Error deleting backup!",

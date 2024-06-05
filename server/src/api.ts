@@ -132,6 +132,33 @@ app.patch("/entry", (req, res) => {
   }
 });
 
+/* ---------------------------------------- */
+/* --------- DELETE /entry/delete --------- */
+/* ---------------------------------------- */
+app.delete("/entry", async (req, res) => {
+  const errors = {
+    missingFields: { error: "Missing entry id" },
+    internal: { error: "Something went wrong while DELETING entry." },
+  };
+
+  try {
+    const requestPayload: RequestPayload.DELETE.Entry["body"] = req.body;
+
+    console.log("Attempt to delete entry: ", requestPayload);
+
+    if (!requestPayload.id) {
+      console.log("Will fail!");
+      res.status(404).json(errors.missingFields);
+      return;
+    }
+
+    await Cebola.deleteEntry(requestPayload.id);
+    req.res.status(200).send(requestPayload);
+  } catch {
+    req.res.status(500).json(errors.internal);
+  }
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

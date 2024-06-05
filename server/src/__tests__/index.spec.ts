@@ -72,20 +72,20 @@ describe("3 ENTRIES SUITE", () => {
     }
   });
 
-  it.skip("Should delete all entries from /database/entries", async () => {
+  it("Should delete all entries from /database/entries", async () => {
     for (const id of dummyEntryIds) {
       await Cebola.deleteEntry(id);
     }
   });
 });
 
-describe("10 ENTRIES SUITE", () => {
+describe.only("10 ENTRIES SUITE", () => {
   it("Should delete all entries and backups before proceed...", async () => {
     const hasDeletedAll = await deleteAllEntries();
     expect(hasDeletedAll).toBe(true);
   });
 
-  it("Should create 21 files (10 new entries + 1 tail + 10 backup files).", async () => {
+  it.only("Should create 21 files (10 new entries + 1 tail + 10 backup files).", async () => {
     const dummyEntry = {
       id: undefined,
       domain: undefined,
@@ -131,7 +131,7 @@ describe("10 ENTRIES SUITE", () => {
     }
   });
 
-  it.skip("Should have the right pointers on each entry.", async () => {
+  it("Should have the right pointers on each entry.", async () => {
     for (const entryId of dummyEntryIds2) {
       const entryData = await Cebola.getEntry(entryId);
 
@@ -160,7 +160,7 @@ describe("10 ENTRIES SUITE", () => {
     }
   });
 
-  it.skip("Should delete all entries from /database/entries", async () => {
+  it("Should delete all entries from /database/entries", async () => {
     for (const id of dummyEntryIds) {
       await Cebola.deleteEntry(id);
     }

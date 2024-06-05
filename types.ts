@@ -30,4 +30,13 @@ export namespace RequestPayload {
       body: Pick<Entry, "description" | "domain" | "password" | "username">;
     }
   }
+
+  export namespace DELETE {
+    export interface Entry {
+      body: {
+        /** Entry id */
+        id: string;
+      };
+    }
+  }
 }
