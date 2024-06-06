@@ -18,6 +18,7 @@ app.use(express.json());
 app.get("/entries", async (req, res) => {
   const errors = {
     missingFields: { error: "Missing fields" },
+    noEntries: { error: "Oops. No entries were found!" },
     internal: { error: "Something went wrong while retrieving entries." },
   };
 
@@ -36,6 +37,10 @@ app.get("/entries", async (req, res) => {
       entry = await Cebola.getEntry(query.cursor);
     } else {
       const lastEntryId = await Cebola.getTailId();
+      if (!lastEntryId) {
+        req.res.status(404).json([]);
+        return;
+      }
       entry = await Cebola.getEntry(lastEntryId);
     }
 
@@ -152,8 +157,8 @@ app.delete("/entry", async (req, res) => {
       return;
     }
 
-    await Cebola.deleteEntry(requestPayload.id);
-    req.res.status(200).send(requestPayload);
+    const deletedEntry = await Cebola.deleteEntry(requestPayload.id);
+    req.res.status(200).send(deletedEntry);
   } catch {
     req.res.status(500).json(errors.internal);
   }
@@ -168,13 +173,7 @@ app.listen(PORT, () => {
 function hasMissingFields(entry: RequestPayload.POST.Entry["body"]) {
   try {
     console.log("hasMissingFields", entry);
-    if (
-      !entry ||
-      !entry.description ||
-      !entry.domain ||
-      !entry.password ||
-      !entry.username
-    ) {
+    if (!entry || !entry.description || !entry.password) {
       return true;
     }
 

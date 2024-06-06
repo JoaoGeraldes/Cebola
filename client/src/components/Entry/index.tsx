@@ -40,5 +40,4 @@ export default function EntryCard(props: Props) {
 const StyledEntryCard = styled("div")`
   display: flex;
   flex-direction: column;
-  background: #eaeaea;
 `;

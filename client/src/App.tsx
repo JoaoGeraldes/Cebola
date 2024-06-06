@@ -1,7 +1,11 @@
 import React, { Fragment, useEffect, useState } from "react";
 import "./App.css";
-import { Entry } from "../../types";
+import { Entry, NewEntry } from "../../types";
 import EntryCard from "./components/Entry";
+import EntryForm from "./components/EntryForm";
+import styled, { ThemeProvider } from "styled-components";
+import Button from "./components/Button";
+import { theme } from "./theme";
 
 function App() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
@@ -21,8 +25,11 @@ function App() {
     loadEntries();
   }, []);
 
-  async function loadEntries() {
-    const result = await CebolaClient.getEntries({ cursor: cursor, length: 5 });
+  async function loadEntries(_cursor?: string | null) {
+    const result = await CebolaClient.getEntries({
+      cursor: _cursor === null ? _cursor : cursor,
+      length: 3,
+    });
 
     if (!result) return;
 
@@ -35,10 +42,10 @@ function App() {
 
   async function handleEntryDelete(entryId: string) {
     try {
-      console.log(entryId);
-      await CebolaClient.deleteEntry(entryId);
+      const deletedEntry = await CebolaClient.deleteEntry(entryId);
 
-      if (entryId === cursor) {
+      if (deletedEntry) {
+        loadEntries(deletedEntry.previousEntryId);
       }
     } catch {
       console.error("Failed to delete entry.");
@@ -46,24 +53,54 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <button onClick={loadEntries}>load</button>
-      <h1>Current cursor: {cursor}</h1>
-      {entries &&
-        entries.map((entry) => (
-          <Fragment key={entry.id}>
-            <EntryCard
-              entry={entry}
-              onDelete={() => handleEntryDelete(entry.id)}
-            />
-            <hr />
-          </Fragment>
-        ))}
-    </div>
+    <ThemeProvider theme={theme}>
+      <StyledApp className="App">
+        <h1>Current cursor: {cursor}</h1>
+        {entries &&
+          entries.map((entry) => (
+            <Fragment key={entry.id}>
+              <EntryCard
+                entry={entry}
+                onDelete={async () => {
+                  await handleEntryDelete(entry.id);
+                  /* const entries = await CebolaClient.getEntries({
+                  cursor: cursor,
+                  length: null,
+                });
+                if (entries) {
+                  setEntries(entries);
+                  setCursor(entries[entries?.length - 1].previousEntryId);
+                } */
+                  /*  loadEntries(entry.previousEntryId); */
+                }}
+              />
+              <hr />
+            </Fragment>
+          ))}
+        <EntryForm
+          onSubmit={async (formData) => {
+            await CebolaClient.createEntry(formData);
+            loadEntries(null);
+            /*   const entries = await CebolaClient.getEntries({
+            cursor: cursor,
+            length: null,
+          });
+          if (entries) {
+            setEntries(entries);
+            setCursor(entries[entries?.length - 1].previousEntryId);
+          } */
+          }}
+        />
+      </StyledApp>
+    </ThemeProvider>
   );
 }
 
 export default App;
+
+const StyledApp = styled("div")`
+  background: ${(props) => props.theme.bg};
+`;
 
 interface Endpoints {
   base: string;
@@ -87,7 +124,7 @@ interface Endpoints {
   POST: {
     entry: {
       path: string;
-      body: Pick<Entry, "username" | "description" | "domain" | "password">;
+      body: NewEntry;
     };
   };
 }
@@ -98,14 +135,13 @@ class CebolaClient {
     "/entry": "/entry",
   };
 
-  static async deleteEntry(entryId: string) {
+  static async deleteEntry(entryId: string): Promise<Entry | null> {
     const requestPayload: Endpoints["DELETE"]["entry"]["body"] = {
       id: entryId,
     };
     const url = `${this.endpoint.base}${this.endpoint["/entry"]}`;
 
     try {
-      console.log("requestPayload ", requestPayload);
       const response = await fetch(url, {
         method: "delete",
         mode: "cors",
@@ -115,7 +151,27 @@ class CebolaClient {
         body: JSON.stringify(requestPayload),
       });
 
-      console.log("response", response);
+      const json = await response.json();
+
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  }
+
+  static async createEntry(payload: NewEntry) {
+    const url = `${this.endpoint.base}${this.endpoint["/entry"]}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "post",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
       return response;
     } catch {
       return null;

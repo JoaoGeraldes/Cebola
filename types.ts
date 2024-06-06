@@ -1,12 +1,12 @@
 export interface Entry {
   /** Should correspond to the file's name i.e.: (`entryId123.json` should contain an id of `entryId123`) */
   id: string;
-  domain: string;
-  description?: string;
+  domain?: string;
+  description: string;
   /**
    * username or e-mail
    */
-  username: string;
+  username?: string;
   password: string;
   /**
    * Date as ISO string format - when the entry was added.
@@ -16,6 +16,9 @@ export interface Entry {
   previousEntryId: string | null;
   nextEntryId: string | null;
 }
+
+export type NewEntry = Partial<Pick<Entry, "domain" | "username">> &
+  Pick<Entry, "description" | "password">;
 
 export namespace RequestPayload {
   export namespace GET {
@@ -27,7 +30,7 @@ export namespace RequestPayload {
 
   export namespace POST {
     export interface Entry {
-      body: Pick<Entry, "description" | "domain" | "password" | "username">;
+      body: NewEntry;
     }
   }
 

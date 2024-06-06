@@ -74,6 +74,10 @@ export class Cebola {
 
     const filePath = absolutePath(relativePath.entry(entryId));
 
+    const fileExists = fs2.existsSync(filePath);
+
+    if (!fileExists) return null;
+
     try {
       const entryJson = await fs.readFile(filePath, "utf8");
       const entryData: Partial<Entry> = JSON.parse(entryJson);
@@ -90,6 +94,10 @@ export class Cebola {
     }
 
     const filePath = absolutePath(relativePath.entry(entryId));
+
+    const fileExists = fs2.existsSync(filePath);
+
+    if (!fileExists) return;
 
     await this.smartBackup(entryId);
 
@@ -184,6 +192,14 @@ export class Cebola {
 
       // Delete backups after entry deletion is successful
       await deleteFile(relativePath.entryBackup(entryId));
+
+      // Delete tail files (original + backup) if this is the last entry
+      if (!entry.previousEntryId && !entry.nextEntryId) {
+        await deleteFile(absolutePath(relativePath.tail));
+        await deleteFile(absolutePath(relativePath.tailBackup));
+      }
+
+      return entry;
     } catch (error) {
       console.error(
         `deleteEntry() - Error deleting JSON file at ${entryToBeDeletedFilePath}:`,
@@ -197,6 +213,13 @@ export class Cebola {
     return new Promise(async (resolve, reject) => {
       try {
         const filePath = absolutePath(relativePath.tail);
+        const fileExists = fs2.existsSync(filePath);
+
+        if (!fileExists) {
+          resolve(null);
+          return;
+        }
+
         const fileContent = await fs.readFile(filePath, { encoding: "utf8" });
         const data: Entry = JSON.parse(fileContent);
 
@@ -221,6 +244,12 @@ export class Cebola {
   static async smartBackup(entryId: string) {
     try {
       if (!entryId) throw new Error("Missing entry ID");
+
+      const fileExists = fs2.existsSync(
+        absolutePath(relativePath.entry(entryId))
+      );
+
+      if (!fileExists) return;
 
       const entryJSON = await fs.readFile(
         absolutePath(relativePath.entry(entryId)),
@@ -423,9 +452,8 @@ export class Cebola {
           backup: relativePath.entryBackup(entry.nextEntryId),
         },
       };
-      console.log("ATTEEMMPT TO DELETE", filesPath.entryFile.backup)
+      console.log("ATTEEMMPT TO DELETE", filesPath.entryFile.backup);
       await deleteFile(filesPath.entryFile.backup);
-     
     } catch (error) {
       console.log(
         "smartBackupDelete() - Error deleting backup!",
