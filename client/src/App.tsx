@@ -74,7 +74,6 @@ function App() {
                   /*  loadEntries(entry.previousEntryId); */
                 }}
               />
-              <hr />
             </Fragment>
           ))}
         <EntryForm
