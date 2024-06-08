@@ -2,7 +2,7 @@ import { Endpoints, Entry, NewEntry, UpdateEntry } from "../../types";
 
 export class CebolaClient {
   static endpoint = {
-    base: "http://localhost:9000",
+    base: "http://192.168.0.170:9000",
     "/entries": "/entries",
     "/entry": "/entry",
   };

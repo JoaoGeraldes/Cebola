@@ -16,7 +16,7 @@ export const theme = {
   },
 
   padding: {
-    default: "5px",
+    default: "8px",
   },
 };
 

@@ -77,7 +77,7 @@ export default function EntryCard(props: Props) {
           <span id="description">{entry.description}</span>
         )}
 
-        <label htmlFor="password">password</label>
+        {entry?.password && <label htmlFor="password">password</label>}
         {isEditing ? (
           <Input
             onChange={handleInputChange}
@@ -94,7 +94,7 @@ export default function EntryCard(props: Props) {
           </span>
         )}
 
-        <label htmlFor="domain">domain</label>
+        {entry?.domain && <label htmlFor="domain">domain</label>}
         {isEditing ? (
           <Input
             onChange={handleInputChange}
@@ -124,7 +124,7 @@ export default function EntryCard(props: Props) {
           </>
         )}
 
-        <label htmlFor="username">username</label>
+        {entry?.username && <label htmlFor="username">username</label>}
         {isEditing ? (
           <Input
             onChange={handleInputChange}
@@ -158,13 +158,15 @@ const StyledEntry = styled("div")`
   display: flex;
   flex-direction: column;
   align-items: center;
-
   margin: ${(props) => props.theme.margin.default};
 
   .date {
     display: flex;
     width: 100%;
     justify-content: flex-end;
+    color: #9a9e97;
+    background: linear-gradient(270deg, #0000000d, transparent);
+    text-shadow: 1px 1px #25301e;
   }
 
   .actions {
@@ -194,18 +196,20 @@ const StyledEntry = styled("div")`
     align-items: flex-start;
     background: ${(props) => props.theme.color.darkerBg};
     padding: ${(props) => props.theme.padding.default};
-    box-shadow: 1px 1px 0px 0px #3e4b35;
+    box-shadow: 1px 1px 0px 0px #37442e;
     position: relative;
 
     span {
       color: ${(props) => props.theme.color.fg};
+      text-shadow: 1px 1px #000000;
       max-width: 57%;
     }
 
     label {
-      color: #1e251a;
+      color: #8ca878;
+      text-shadow: 1px 1px #25301e;
+      font-variant: all-petite-caps;
       font-size: 0.8em;
-      font-style: italic;
       margin-top: 5px;
       left: 0;
     }

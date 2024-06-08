@@ -85,4 +85,5 @@ export default App;
 
 const StyledApp = styled("div")`
   background: ${(props) => props.theme.bg};
+  padding: ${(props) => props.theme.padding.default};
 `;

@@ -4,6 +4,12 @@ import path from "path";
 
 export async function copyFile(source: string, destination: string) {
   try {
+    const sourceExists = fs2.existsSync(source);
+    console.log(
+      `Did not find the source provided. The source provided is: ${source}`
+    );
+    if (!sourceExists) return null;
+
     await fs.copyFile(source, destination);
     console.log(`${source} was copied to ${destination}`);
     return true;
