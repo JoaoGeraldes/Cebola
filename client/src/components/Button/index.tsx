@@ -18,7 +18,7 @@ const StyledButton = styled("button")<Props>`
   color: ${(props) => props.theme.color.fg};
   padding: 0.4em 0.8em;
   cursor: pointer;
-  margin: ${(props) => props.theme.margin.default};
+  /* margin: ${(props) => props.theme.margin.default}; */
 
   &:hover {
     color: ${(props) => props.theme.color.yellow};

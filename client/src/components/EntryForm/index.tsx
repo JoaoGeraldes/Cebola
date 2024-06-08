@@ -36,14 +36,14 @@ export default function EntryForm(props: Props) {
         <span className="hint">
           <i>* required fields</i>
         </span>
-        <label htmlFor="description">Description *</label>
+        <label htmlFor="description">🧅 Description *</label>
         <Input
           required
           id="description"
           onChange={handleInputChange}
           type="text"
         />
-        <label htmlFor="password">Password *</label>
+        <label htmlFor="password">🔑 Password *</label>
         <Input
           required
           onChange={handleInputChange}

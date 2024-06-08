@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { Entry, RequestPayload } from "../../types.ts";
-import { Cebola } from "./Cebola.ts";
+import { CebolaServer } from "./CebolaServer.ts";
 
 const app = express();
 const PORT = process.env.PORT || 9000;
@@ -34,19 +34,19 @@ app.get("/entries", async (req, res) => {
     const entriesPerPage = parseInt(query.length) || 5;
 
     if (query.cursor) {
-      entry = await Cebola.getEntry(query.cursor);
+      entry = await CebolaServer.getEntry(query.cursor);
     } else {
-      const lastEntryId = await Cebola.getTailId();
+      const lastEntryId = await CebolaServer.getTailId();
       if (!lastEntryId) {
         req.res.status(404).json([]);
         return;
       }
-      entry = await Cebola.getEntry(lastEntryId);
+      entry = await CebolaServer.getEntry(lastEntryId);
     }
 
     if (entry) {
       for (let i = 0; i < entriesPerPage; i++) {
-        /* const previous = await Cebola.getEntry(entry.id); */
+        /* const previous = await CebolaServer.getEntry(entry.id); */
 
         entriesToSend.push(entry as Entry);
 
@@ -54,7 +54,7 @@ app.get("/entries", async (req, res) => {
           break;
         }
 
-        entry = (await Cebola.getEntry(entry.previousEntryId)) as Entry;
+        entry = (await CebolaServer.getEntry(entry.previousEntryId)) as Entry;
       }
 
       req.res.status(200).json(entriesToSend);
@@ -92,7 +92,7 @@ app.post("/entry", async (req, res) => {
       return;
     }
 
-    const hasSucceeded = await Cebola.createEntry({
+    const hasSucceeded = await CebolaServer.createEntry({
       ...requestPayload,
     });
 
@@ -112,26 +112,32 @@ app.post("/entry", async (req, res) => {
 /* -------------------------------- */
 /* --------- PATCH /entry --------- */
 /* -------------------------------- */
-app.patch("/entry", (req, res) => {
+app.patch("/entry", async (req, res) => {
   const errors = {
-    missingFields: { error: "Missing fields" },
+    missingFields: {
+      error: "Missing mandatory fields: 'password' or 'description' or 'id'",
+    },
     internal: { error: "Something went wrong while creating entry." },
   };
 
   try {
-    const requestPayload: RequestPayload.POST.Entry["body"] = req.body;
+    const requestPayload: RequestPayload.PATCH.Entry["body"] = req.body;
 
     if (
-      !requestPayload.description &&
-      !requestPayload.domain &&
-      !requestPayload.password &&
-      !requestPayload.username
+      !requestPayload?.id &&
+      !requestPayload?.payload?.domain &&
+      !requestPayload?.payload?.password
     ) {
       req.res.status(404).json(errors.missingFields);
       return;
     }
 
-    req.res.status(200).send(requestPayload);
+    const updatedEntry = await CebolaServer.updateEntry(
+      requestPayload.id,
+      requestPayload.payload
+    );
+
+    req.res.status(200).send(updatedEntry);
   } catch {
     req.res.status(500).json(errors.internal);
   }
@@ -157,7 +163,7 @@ app.delete("/entry", async (req, res) => {
       return;
     }
 
-    const deletedEntry = await Cebola.deleteEntry(requestPayload.id);
+    const deletedEntry = await CebolaServer.deleteEntry(requestPayload.id);
     req.res.status(200).send(deletedEntry);
   } catch {
     req.res.status(500).json(errors.internal);

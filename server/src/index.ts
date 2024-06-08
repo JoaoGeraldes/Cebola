@@ -1,10 +1,10 @@
-import { Cebola } from "./Cebola.ts";
+import { CebolaServer } from "./CebolaServer.ts";
 import "./api.ts";
-/* Cebola.deleteEntry("nwpxaji7hr2mxbu7akr9e18s"); */
+/* CebolaServer.deleteEntry("nwpxaji7hr2mxbu7akr9e18s"); */
 
 // Utils
 
-/* Cebola.createEntry(
+/* CebolaServer.createEntry(
   {
     domain: "entry1",
     password: "entry1",
@@ -13,7 +13,7 @@ import "./api.ts";
   },
   "entry1"
 ).then(() => {
-  Cebola.createEntry(
+  CebolaServer.createEntry(
     {
       domain: "entry2",
       password: "entry2",
@@ -22,7 +22,7 @@ import "./api.ts";
     },
     "entry2"
   ).then(() => {
-    Cebola.createEntry(
+    CebolaServer.createEntry(
       {
         domain: "entry3",
         password: "entry3",
@@ -34,15 +34,15 @@ import "./api.ts";
   });
 }); */
 
-/* Cebola.deleteEntry("entry1").then(() => {
-  Cebola.deleteEntry("entry2").then(() => {
-    Cebola.deleteEntry("entry3");
+/* CebolaServer.deleteEntry("entry1").then(() => {
+  CebolaServer.deleteEntry("entry2").then(() => {
+    CebolaServer.deleteEntry("entry3");
   });
 }); */
-/* Cebola.deleteEntry("entry1"); */
+/* CebolaServer.deleteEntry("entry1"); */
 
 /* export async function start_now() {
-  const id = await Cebola.getTailId();
+  const id = await CebolaServer.getTailId();
   console.log("getTailId", id);
 }
 

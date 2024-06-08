@@ -11,19 +11,21 @@ export default function Input(props: Props) {
 }
 
 const StyledInput = styled("input")<Props>`
+  width: 100%;
   background: ${(props) => props.theme.color.darkBg};
   border-top: 2px solid ${(props) => props.theme.color.darkBorder};
   border-left: 2px solid ${(props) => props.theme.color.darkBorder};
   border-bottom: 1px solid ${(props) => props.theme.color.lightBorder};
   border-right: 1px solid ${(props) => props.theme.color.lightBorder};
   color: ${(props) => props.theme.color.fg};
-  padding: 0.5em;
-  opacity: 0.7;
+  padding: ${(props) => props.theme.padding.default} 0;
+  opacity: 0.5;
   transition: opacity 0.4s;
-  margin: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 
   &:focus-visible {
-    outline: 2px solid #ffffff89;
+    outline: 2px solid ${(props) => props.theme.color.greeen};
     outline-style: dashed;
   }
 

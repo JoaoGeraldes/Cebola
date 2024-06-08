@@ -4,10 +4,10 @@ import path from "path";
 
 import { createId } from "@paralleldrive/cuid2";
 import { absolutePath, copyFile, deleteFile } from "./utils/utils.ts";
-import { Entry } from "../../types.ts";
+import { Entry, UpdateEntry } from "../../types.ts";
 import { relativePath } from "./config.ts";
 
-export class Cebola {
+export class CebolaServer {
   static async createEntry(
     obj: Omit<
       Entry,
@@ -113,7 +113,7 @@ export class Cebola {
 
       await fs.writeFile(filePath, jsonString, "utf8");
 
-      return true;
+      return JSON.parse(jsonString);
     } catch (error) {
       console.log(`updateEntry() - Error updating JSON file at ${filePath}:`);
       throw error;
@@ -242,6 +242,7 @@ export class Cebola {
    * Creates backups of all files that are linked to a given entry
    */
   static async smartBackup(entryId: string) {
+    let caseSelectedTEmp = "";
     try {
       if (!entryId) throw new Error("Missing entry ID");
 
@@ -260,20 +261,20 @@ export class Cebola {
 
       const filesPath = {
         tailFile: {
-          original: relativePath.tail,
-          backup: relativePath.tailBackup,
+          original: absolutePath(relativePath.tail),
+          backup: absolutePath(relativePath.tailBackup),
         },
         entryFile: {
-          original: relativePath.entry(entryId),
-          backup: relativePath.entryBackup(entryId),
+          original: absolutePath(relativePath.entry(entryId)),
+          backup: absolutePath(relativePath.entryBackup(entryId)),
         },
         previousEntryFile: {
-          original: relativePath.entry(entry.previousEntryId),
-          backup: relativePath.entryBackup(entry.previousEntryId),
+          original: absolutePath(relativePath.entry(entry.previousEntryId)),
+          backup: absolutePath(relativePath.entryBackup(entry.previousEntryId)),
         },
         nextEntryFile: {
-          original: relativePath.entryBackup(entry.nextEntryId),
-          backup: relativePath.entryBackup(entry.nextEntryId),
+          original: absolutePath(relativePath.entryBackup(entry.nextEntryId)),
+          backup: absolutePath(relativePath.entryBackup(entry.nextEntryId)),
         },
       };
 
@@ -284,12 +285,14 @@ export class Cebola {
 
       switch (this.entryPosition(entry)) {
         case "single":
+          caseSelectedTEmp = "single";
           await copyFile(
             filesPath.entryFile.original,
             filesPath.entryFile.backup
           );
           break;
         case "head":
+          caseSelectedTEmp = "head";
           await copyFile(
             filesPath.entryFile.original,
             filesPath.entryFile.backup
@@ -301,6 +304,7 @@ export class Cebola {
           );
           break;
         case "body":
+          caseSelectedTEmp = "body";
           await copyFile(
             filesPath.entryFile.original,
             filesPath.entryFile.backup
@@ -317,6 +321,7 @@ export class Cebola {
           );
           break;
         case "tail":
+          caseSelectedTEmp = "tail";
           await copyFile(
             filesPath.entryFile.original,
             filesPath.entryFile.backup
@@ -334,6 +339,8 @@ export class Cebola {
     } catch (error) {
       console.trace("smartBackup() - failed to create backups.", error.message);
       throw error;
+    } finally {
+      console.log("SMART BACKUP CASE: " + caseSelectedTEmp);
     }
   }
 

@@ -1,4 +1,4 @@
-import { Cebola } from "../Cebola.ts";
+import { CebolaServer } from "../CebolaServer.ts";
 import fs from "fs";
 import path from "path";
 import { relativePath } from "../config.ts";
@@ -36,7 +36,7 @@ describe("3 ENTRIES SUITE", () => {
       tail: undefined,
     };
     for await (const entryId of dummyEntryIds) {
-      await Cebola.createEntry(dummyEntry, entryId);
+      await CebolaServer.createEntry(dummyEntry, entryId);
     }
 
     const entriesCount = await filesInDirectoryCount(relativePath.entries);
@@ -45,7 +45,7 @@ describe("3 ENTRIES SUITE", () => {
 
   it("Should have the right pointers on each entry.", async () => {
     for (const entryId of dummyEntryIds) {
-      const entryData = await Cebola.getEntry(entryId);
+      const entryData = await CebolaServer.getEntry(entryId);
 
       const isFirstEntry = entryId === dummyEntryIds[0];
       const isLastEntry = entryId === dummyEntryIds[dummyEntryIds.length - 1];
@@ -74,7 +74,7 @@ describe("3 ENTRIES SUITE", () => {
 
   it("Should delete all entries from /database/entries", async () => {
     for (const id of dummyEntryIds) {
-      await Cebola.deleteEntry(id);
+      await CebolaServer.deleteEntry(id);
     }
   });
 });
@@ -97,7 +97,7 @@ describe.only("10 ENTRIES SUITE", () => {
       tail: undefined,
     };
     for await (const entryId of dummyEntryIds2) {
-      await Cebola.createEntry(dummyEntry, entryId);
+      await CebolaServer.createEntry(dummyEntry, entryId);
     }
 
     const entriesCount = await filesInDirectoryCount(relativePath.entries);
@@ -105,23 +105,23 @@ describe.only("10 ENTRIES SUITE", () => {
   });
 
   it("The tail should be `entry10`", async () => {
-    const tail = await Cebola.getTailId();
+    const tail = await CebolaServer.getTailId();
 
     expect(tail).toBe("entry10");
   });
 
   it("Tail should be `entry9` upon deleting `entry10`", async () => {
-    await Cebola.deleteEntry("entry10");
+    await CebolaServer.deleteEntry("entry10");
 
-    const tail = await Cebola.getTailId();
+    const tail = await CebolaServer.getTailId();
 
     expect(tail).toBe("entry9");
   });
 
   it("Head should be `entry2` upon deleting `entry1`", async () => {
-    await Cebola.deleteEntry("entry1");
+    await CebolaServer.deleteEntry("entry1");
 
-    const entry2 = await Cebola.getEntry("entry2");
+    const entry2 = await CebolaServer.getEntry("entry2");
 
     if (entry2) {
       expect(entry2.previousEntryId).toBe(null);
@@ -133,7 +133,7 @@ describe.only("10 ENTRIES SUITE", () => {
 
   it("Should have the right pointers on each entry.", async () => {
     for (const entryId of dummyEntryIds2) {
-      const entryData = await Cebola.getEntry(entryId);
+      const entryData = await CebolaServer.getEntry(entryId);
 
       const isFirstEntry = entryId === dummyEntryIds2[0];
       const isLastEntry = entryId === dummyEntryIds2[dummyEntryIds2.length - 1];
@@ -162,7 +162,7 @@ describe.only("10 ENTRIES SUITE", () => {
 
   it("Should delete all entries from /database/entries", async () => {
     for (const id of dummyEntryIds) {
-      await Cebola.deleteEntry(id);
+      await CebolaServer.deleteEntry(id);
     }
   });
 });

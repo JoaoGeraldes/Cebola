@@ -17,6 +17,9 @@ export interface Entry {
   nextEntryId: string | null;
 }
 
+export type UpdateEntry = Pick<Entry, "description" | "password"> &
+  Pick<Partial<Entry>, "domain" | "username">;
+
 export type NewEntry = Partial<Pick<Entry, "domain" | "username">> &
   Pick<Entry, "description" | "password">;
 
@@ -34,6 +37,15 @@ export namespace RequestPayload {
     }
   }
 
+  export namespace PATCH {
+    export interface Entry {
+      body: {
+        id: string;
+        payload: Partial<UpdateEntry>;
+      };
+    }
+  }
+
   export namespace DELETE {
     export interface Entry {
       body: {
@@ -42,4 +54,31 @@ export namespace RequestPayload {
       };
     }
   }
+}
+
+export interface Endpoints {
+  base: string;
+  GET: {
+    entries: {
+      path: string;
+      params: {
+        cursor: string | null;
+        length: number | null;
+      };
+    };
+  };
+  DELETE: {
+    entry: {
+      path: string;
+      body: {
+        id: string | null;
+      };
+    };
+  };
+  POST: {
+    entry: {
+      path: string;
+      body: NewEntry;
+    };
+  };
 }

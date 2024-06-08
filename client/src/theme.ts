@@ -3,13 +3,19 @@ export const theme = {
     fg: "#ffffff",
     bg: "#4c5844",
     darkBg: "#3e4637",
+    darkerBg: "#485440",
     lightBorder: "#64735b",
     darkBorder: "#30372a",
     yellow: "#c3b44f",
+    greeen: "#66ff00",
     label: "#a2b298",
   },
 
   margin: {
+    default: "5px",
+  },
+
+  padding: {
     default: "5px",
   },
 };
