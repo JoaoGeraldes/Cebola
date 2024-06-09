@@ -6,6 +6,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { absolutePath, copyFile, deleteFile } from "./utils/utils.ts";
 import { Entry, UpdateEntry } from "../../types.ts";
 import { relativePath } from "./config.ts";
+import { decrypt, encrypt } from "./utils/crypto.ts";
 
 export class CebolaServer {
   static async createEntry(

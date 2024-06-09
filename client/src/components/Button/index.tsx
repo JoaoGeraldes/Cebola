@@ -10,11 +10,16 @@ export default function Button(props: Props) {
 }
 
 const StyledButton = styled("button")<Props>`
+  letter-spacing: 1px;
+  font-variant: petite-caps;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: ${(props) => props.theme.color.bg};
   border-top: 1px solid ${(props) => props.theme.color.lightBorder};
-  border-left: unset;
+  border-left: 1px solid ${(props) => props.theme.color.lightBorder};
   border-bottom: 1px solid ${(props) => props.theme.color.darkBorder};
-  border-right: unset;
+  border-right: 1px solid ${(props) => props.theme.color.darkBorder};
   color: ${(props) => props.theme.color.yellow};
   cursor: pointer;
   padding: 0.4em 0.6em;

@@ -3,6 +3,12 @@ import { Entry, UpdateEntry } from "../../../../types";
 import Button from "../Button";
 import { useEffect, useState } from "react";
 import Input from "../Input";
+import ChevronUp from "../Icons/ChevronUp";
+import Pencil from "../Icons/Pencil";
+import { theme } from "../../theme";
+import Bin from "../Icons/Bin";
+import Disk from "../Icons/Disk";
+import Return from "../Icons/Return";
 
 interface Props {
   entry: Entry;
@@ -20,6 +26,8 @@ export default function EntryCard(props: Props) {
   const [showPasswordMenu, setShowPasswordMenu] = useState(false);
 
   const [reveal, setReveal] = useState(false);
+
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const date = new Date(entry.date);
 
@@ -56,15 +64,47 @@ export default function EntryCard(props: Props) {
     }
   }
 
+  const dateSection = (
+    <div className="date" onClick={() => setIsExpanded(!isExpanded)}>
+      <small>
+        {/*   {formattedDate.time}  */}
+        {formattedDate.date}
+      </small>
+      <div
+        style={{
+          transform: !isExpanded ? "rotate(180deg)" : "",
+        }}
+      >
+        <ChevronUp fill="white" />
+      </div>
+    </div>
+  );
+
+  if (!isExpanded) {
+    return (
+      <StyledEntry key={entry.id}>
+        <div className="card">
+          {dateSection}
+          <label htmlFor="description">description</label>
+          {isEditing ? (
+            <Input
+              onChange={handleInputChange}
+              id="description"
+              type="text"
+              value={entryInputsData.description ?? entry.description}
+            />
+          ) : (
+            <span id="description">{entry.description}</span>
+          )}
+        </div>
+      </StyledEntry>
+    );
+  }
+
   return (
     <StyledEntry key={entry.id}>
       <div className="card">
-        <div className="date">
-          <small>
-            {/*   {formattedDate.time}  */}
-            {formattedDate.date}
-          </small>
-        </div>
+        {dateSection}
         <label htmlFor="description">description</label>
         {isEditing ? (
           <Input
@@ -138,15 +178,27 @@ export default function EntryCard(props: Props) {
 
         <div className="actions">
           {isEditing ? (
-            <Button onClick={() => setIsEditing(false)}>Cancel</Button>
+            <Button onClick={() => setIsEditing(false)}>
+              <Return fill={theme.color.yellow} />
+              &nbsp; Cancel
+            </Button>
           ) : (
-            <Button onClick={() => setIsEditing(true)}>Edit</Button>
+            <Button onClick={() => setIsEditing(true)}>
+              <Pencil fill={theme.color.yellow} />
+              &nbsp; Edit
+            </Button>
           )}
 
           {isEditing ? (
-            <Button onClick={handleOnEditSave}>Save</Button>
+            <Button onClick={handleOnEditSave}>
+              <Disk fill={theme.color.yellow} />
+              &nbsp;Save
+            </Button>
           ) : (
-            <Button onClick={handleDelete}>Delete</Button>
+            <Button onClick={handleDelete}>
+              <Bin fill={theme.color.yellow} />
+              &nbsp;Delete
+            </Button>
           )}
         </div>
       </div>
@@ -158,15 +210,18 @@ const StyledEntry = styled("div")`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: ${(props) => props.theme.margin.default};
+  margin-top: ${(props) => props.theme.margin.default};
+  margin-bottom: ${(props) => props.theme.margin.default};
 
   .date {
     display: flex;
     width: 100%;
-    justify-content: flex-end;
+    justify-content: space-between;
     color: #9a9e97;
-    background: linear-gradient(270deg, #0000000d, transparent);
     text-shadow: 1px 1px #25301e;
+    align-items: center;
+    cursor: pointer;
+    padding: ${(props) => props.theme.padding.default};
   }
 
   .actions {
@@ -190,7 +245,6 @@ const StyledEntry = styled("div")`
 
   .card {
     width: 100%;
-    max-width: 400px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;

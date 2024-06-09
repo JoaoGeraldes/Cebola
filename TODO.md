@@ -1,0 +1,1 @@
+- Add token verification for the rest of the endpoints, like it was done on the GET /entries. (client must send Authorization header with bearer token retrieved from /login). Server must accept a third parameter which passes the token verification function.

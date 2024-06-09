@@ -13,6 +13,7 @@ export const theme = {
 
   margin: {
     default: "5px",
+    double: "10px",
   },
 
   padding: {

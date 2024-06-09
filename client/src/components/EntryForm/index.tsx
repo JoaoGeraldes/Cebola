@@ -3,13 +3,18 @@ import { NewEntry } from "../../../../types";
 import Input from "../Input";
 import Button from "../Button";
 import styled from "styled-components";
+import Plus from "../Icons/Plus";
+import { theme } from "../../theme";
+import Return from "../Icons/Return";
+import Disk from "../Icons/Disk";
 
 interface Props {
   onSubmit: (formData: NewEntry) => void;
+  onCancel: () => void;
 }
 
 export default function EntryForm(props: Props) {
-  const { onSubmit } = props;
+  const { onSubmit, onCancel } = props;
 
   const [formData, setFormData] = useState<NewEntry>({
     description: "",
@@ -33,6 +38,9 @@ export default function EntryForm(props: Props) {
   return (
     <StyledForm onSubmit={handleSubmit}>
       <div className="limiter">
+        <h1>
+          <Plus fill={theme.color.lightBorder} /> Add new entry
+        </h1>
         <span className="hint">
           <i>* required fields</i>
         </span>
@@ -54,7 +62,16 @@ export default function EntryForm(props: Props) {
         <Input onChange={handleInputChange} id="domain" type="text" />
         <label htmlFor="Username">Username</label>
         <Input onChange={handleInputChange} id="username" type="text" />
-        <Button>Save</Button>
+        <div className="actions">
+          <Button type="button" onClick={onCancel}>
+            <Return fill={theme.color.yellow} />
+            &nbsp;Cancel
+          </Button>
+          <Button type="submit">
+            <Disk fill={theme.color.yellow} />
+            &nbsp;Save
+          </Button>
+        </div>
       </div>
     </StyledForm>
   );
@@ -66,6 +83,11 @@ const StyledForm = styled("form")`
   justify-content: center;
   align-items: center;
   width: 100%;
+  animation: fadeIn 0.3s;
+
+  h1 {
+    color: ${(props) => props.theme.color.lightBorder};
+  }
 
   .hint {
     text-align: right;
@@ -79,10 +101,27 @@ const StyledForm = styled("form")`
     max-width: 700px;
   }
 
+  .actions {
+    margin-top: ${(props) => props.theme.margin.double};
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
   label {
     text-align: left;
     color: ${(props) => props.theme.color.label};
     margin-top: 10px;
     margin-left: ${(props) => props.theme.margin.default};
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 `;

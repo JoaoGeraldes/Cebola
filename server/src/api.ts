@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import { Entry, RequestPayload } from "../../types.ts";
 import { CebolaServer } from "./CebolaServer.ts";
+import { auth } from "./config.ts";
+import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = process.env.PORT || 9000;
@@ -12,10 +14,60 @@ app.use(cors());
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+// Middleware to verify JWT from headers
+function verifyJWTToken(req, res, next) {
+  const token = req.headers["authorization"];
+  if (!token) {
+    return res.status(403).json({ error: "No token provided" });
+  }
+
+  const tokenParts = token.split(" ");
+  if (tokenParts[0] !== "Bearer" || !tokenParts[1]) {
+    return res.status(403).json({ error: "Invalid token format" });
+  }
+
+  jwt.verify(tokenParts[1], auth.secretKey, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ error: "Failed to authenticate token" });
+    }
+    req.userId = decoded.id;
+    next();
+  });
+}
+
+/* ------------------------------ */
+/* --------- GET /LOGIN --------- */
+/* ------------------------------ */
+app.post("/login", (req, res, next) => {
+  const { username, password } = req.body;
+
+  // Check if the provided username and password match admin credentials
+  if (
+    username === auth.adminCredentials.username &&
+    password === auth.adminCredentials.password
+  ) {
+    // Create a token with the admin id
+    const token = jwt.sign({ id: auth.adminCredentials.id }, auth.secretKey, {
+      expiresIn: auth.tokenExpiresIn,
+    });
+
+    // Set HttpOnly cookie
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+
+    res.json({ token });
+  } else {
+    res.status(401).json({ error: "Invalid username or password" });
+  }
+});
+
 /* -------------------------------- */
 /* --------- GET /entries --------- */
 /* -------------------------------- */
-app.get("/entries", async (req, res) => {
+app.get("/entries", verifyJWTToken, async (req, res) => {
   const errors = {
     missingFields: { error: "Missing fields" },
     noEntries: { error: "Oops. No entries were found!" },

@@ -1,10 +1,11 @@
 import { Endpoints, Entry, NewEntry, UpdateEntry } from "../../types";
-
+import { objectToQueryString } from "./utils";
 export class CebolaClient {
   static endpoint = {
     base: "http://192.168.0.170:9000",
     "/entries": "/entries",
     "/entry": "/entry",
+    "/login": "/login",
   };
 
   static async updateEntry(entryId: string, payload: Partial<UpdateEntry>) {
@@ -77,11 +78,15 @@ export class CebolaClient {
   static async getEntries(
     queryParams: Endpoints["GET"]["entries"]["params"]
   ): Promise<Entry[] | null> {
-    let queryString = this.objectToQueryString(queryParams);
+    let queryString = objectToQueryString(queryParams);
     const url = `${this.endpoint.base}${this.endpoint["/entries"]}${queryString}`;
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+        },
+      });
       const json = await response.json();
       return json;
     } catch (e) {
@@ -89,15 +94,29 @@ export class CebolaClient {
     }
   }
 
-  private static objectToQueryString(object: Record<string, unknown>) {
+  static async login(requestPayload: {
+    username: string;
+    password: string;
+  }): Promise<Entry[] | null> {
+    const url = `${this.endpoint.base}${this.endpoint["/login"]}`;
+
     try {
-      let queryString = "?";
-      Object.keys(object).forEach((key) => {
-        queryString = `${queryString}&${key}=${object[key] ? object[key] : ""}`;
+      const response = await fetch(url, {
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify(requestPayload),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      return queryString;
+      const json = await response.json();
+
+      if (json) {
+        sessionStorage.setItem("jwt", json.token);
+      }
+      return json;
     } catch (e) {
-      return "?f";
+      return null;
     }
   }
 }
