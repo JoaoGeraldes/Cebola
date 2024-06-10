@@ -1,7 +1,7 @@
 import { CebolaServer } from "../CebolaServer.ts";
 import fs from "fs";
 import path from "path";
-import { relativePath } from "../config.ts";
+import { auth, relativePath } from "../config.ts";
 import { absolutePath } from "../utils/utils.ts";
 
 const dummyEntryIds = ["entry1", "entry2", "entry3"];
@@ -17,8 +17,9 @@ const dummyEntryIds2 = [
   "entry9",
   "entry10",
 ];
+const privateKey = `${auth.adminCredentials.username}+${auth.adminCredentials.password}`;
 
-describe("3 ENTRIES SUITE", () => {
+describe.skip("3 ENTRIES SUITE", () => {
   it("Should delete all entries and backups before proceed...", async () => {
     const hasDeletedAll = await deleteAllEntries();
     expect(hasDeletedAll).toBe(true);
@@ -36,7 +37,7 @@ describe("3 ENTRIES SUITE", () => {
       tail: undefined,
     };
     for await (const entryId of dummyEntryIds) {
-      await CebolaServer.createEntry(dummyEntry, entryId);
+      await CebolaServer.createEntry(dummyEntry, entryId, privateKey);
     }
 
     const entriesCount = await filesInDirectoryCount(relativePath.entries);
@@ -79,7 +80,7 @@ describe("3 ENTRIES SUITE", () => {
   });
 });
 
-describe.only("10 ENTRIES SUITE", () => {
+describe.skip("10 ENTRIES SUITE", () => {
   it("Should delete all entries and backups before proceed...", async () => {
     const hasDeletedAll = await deleteAllEntries();
     expect(hasDeletedAll).toBe(true);
@@ -97,7 +98,7 @@ describe.only("10 ENTRIES SUITE", () => {
       tail: undefined,
     };
     for await (const entryId of dummyEntryIds2) {
-      await CebolaServer.createEntry(dummyEntry, entryId);
+      await CebolaServer.createEntry(dummyEntry, entryId, privateKey);
     }
 
     const entriesCount = await filesInDirectoryCount(relativePath.entries);

@@ -2,8 +2,8 @@ import crypto from "crypto";
 
 const algorithm = "aes-256-cbc"; // Using AES encryption
 
-export function encrypt(rawText: string, privateKey: string, iv: string) {
-  if (!rawText || !privateKey || !iv) {
+export function encrypt(plainText: string, privateKey: string, iv: string) {
+  if (!plainText || !privateKey || !iv) {
     console.log("decrypt() -> Missing arguments.");
     return;
   }
@@ -18,7 +18,7 @@ export function encrypt(rawText: string, privateKey: string, iv: string) {
 
     const cipher = crypto.createCipheriv(algorithm, hashedPrivateKey, ivBuffer);
 
-    let encrypted = cipher.update(rawText, "utf8", "hex");
+    let encrypted = cipher.update(plainText, "utf8", "hex");
 
     encrypted += cipher.final("hex");
 
