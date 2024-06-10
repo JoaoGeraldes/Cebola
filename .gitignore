@@ -1,4 +1,4 @@
-server/database/*
+server/database/**
 
 # dependencies
 node_modules
