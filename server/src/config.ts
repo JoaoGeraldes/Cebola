@@ -1,9 +1,20 @@
 export const relativePath = {
   entries: "./database/entries/",
   tail: "./database/entries/tail.json",
-  tailBackup: "./database/entries/tail_backup.json",
+  tailBackup: "./database/entries/tail.bak",
   entry: (entryId: string) => `./database/entries/${entryId}.json`,
-  entryBackup: (entryId: string) => `./database/entries/${entryId}_backup.json`,
+  entryBackup: (entryId: string) => `./database/entries/${entryId}.bak`,
+  database: "./database",
+  databaseBackup: () => {
+    try {
+      const datetime = new Date();
+      const date = datetime.toLocaleDateString().replaceAll("/", "-");
+      const time = datetime.toLocaleTimeString().replaceAll(":", ".");
+      return `./bak/${date}_${time}_database.zip`;
+    } catch {
+      return `./bak/${Date.now()}_database.zip`;
+    }
+  },
 };
 
 export const auth = {

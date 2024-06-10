@@ -168,7 +168,6 @@ app.post("/entry", async (req, res) => {
       privateKey
     );
 
-    console.log("hasSucceeded", hasSucceeded);
     if (hasSucceeded) {
       req.res.status(200).send(requestPayload);
       return;

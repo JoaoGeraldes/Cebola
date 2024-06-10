@@ -3,7 +3,12 @@ import fs2 from "fs";
 import path from "path";
 
 import { createId } from "@paralleldrive/cuid2";
-import { absolutePath, copyFile, deleteFile } from "./utils/utils.ts";
+import {
+  absolutePath,
+  copyFile,
+  deleteFile,
+  zipDirectory,
+} from "./utils/utils.ts";
 import { Entry, UpdateEntry } from "../../types.ts";
 import { relativePath } from "./config.ts";
 import { decrypt, encrypt } from "./utils/crypto.ts";
@@ -28,14 +33,18 @@ export class CebolaServer {
 
     const uniqueID = _id ? _id : createId();
     const filePath = absolutePath(relativePath.entry(uniqueID));
-    const tailFilePath = absolutePath(relativePath.tail);
     const lastInsertedEntryId = await this.getTailId();
+    const temporaryBackupFilesPaths = [];
 
     // Generate a random initialization vector for encryption
     const iv = crypto.randomBytes(16).toString("hex");
 
     if (lastInsertedEntryId) {
-      await this.smartBackup(lastInsertedEntryId);
+      // Create backup for tail.json (if present)
+      await copyFile(
+        absolutePath(relativePath.tail),
+        absolutePath(relativePath.tailBackup)
+      );
     }
 
     try {
@@ -59,8 +68,8 @@ export class CebolaServer {
 
       await fs.writeFile(filePath, jsonString, "utf8");
 
-      // Create copy for linked list Head
-      await fs.writeFile(tailFilePath, jsonString, "utf8");
+      // Create clone to tail.json
+      await fs.writeFile(absolutePath(relativePath.tail), jsonString, "utf8");
 
       // Link previous entry to this new entry
       if (lastInsertedEntryId) {
@@ -69,7 +78,13 @@ export class CebolaServer {
         });
       }
 
-      return true;
+      // Delete backup
+      await deleteFile(absolutePath(relativePath.tailBackup));
+
+      // full database backup
+      zipDirectory();
+
+      return newEntry;
     } catch (error) {
       console.error(
         `createEntry() - Error creating JSON file at ${filePath}:`,
@@ -111,7 +126,11 @@ export class CebolaServer {
 
     if (!fileExists) return;
 
-    await this.smartBackup(entryId);
+    // Create backup
+    await copyFile(
+      absolutePath(relativePath.entry(entryId)),
+      absolutePath(relativePath.entryBackup(entryId))
+    );
 
     try {
       const entryJson = await fs.readFile(filePath, "utf8");
@@ -125,8 +144,16 @@ export class CebolaServer {
 
       await fs.writeFile(filePath, jsonString, "utf8");
 
+      // Delete backup
+      await deleteFile(absolutePath(relativePath.entryBackup(entryId)));
+
       return JSON.parse(jsonString);
     } catch (error) {
+      // Recover backup
+      await copyFile(
+        absolutePath(relativePath.entryBackup(entryId)),
+        absolutePath(relativePath.entry(entryId))
+      );
       console.log(`updateEntry() - Error updating JSON file at ${filePath}:`);
       throw error;
     }
@@ -162,9 +189,31 @@ export class CebolaServer {
     );
     const entry: Partial<Entry> = JSON.parse(entryJSON);
 
-    await this.smartBackup(entryId);
+    // await this.smartBackup(entryId);
 
     try {
+      // Create backups
+      await copyFile(
+        relativePath.entry(entry.id),
+        relativePath.entryBackup(entry.id)
+      );
+
+      // Create backups
+      if (entry.previousEntryId) {
+        await copyFile(
+          relativePath.entry(entry.previousEntryId),
+          relativePath.entryBackup(entry.previousEntryId)
+        );
+      }
+
+      // Create backups
+      if (entry.nextEntryId) {
+        await copyFile(
+          relativePath.entry(entry.nextEntryId),
+          relativePath.entryBackup(entry.nextEntryId)
+        );
+      }
+
       const entryPosition = this.entryPosition(entry);
 
       switch (entryPosition) {
@@ -203,7 +252,13 @@ export class CebolaServer {
       }
 
       // Delete backups after entry deletion is successful
-      await deleteFile(relativePath.entryBackup(entryId));
+      await deleteFile(absolutePath(relativePath.entryBackup(entryId)));
+      await deleteFile(
+        absolutePath(relativePath.entryBackup(entry.previousEntryId))
+      );
+      await deleteFile(
+        absolutePath(relativePath.entryBackup(entry.nextEntryId))
+      );
 
       // Delete tail files (original + backup) if this is the last entry
       if (!entry.previousEntryId && !entry.nextEntryId) {
