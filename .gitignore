@@ -1,4 +1,7 @@
-database
+server/database/entries/*
+server/database/bak/*
+!server/database/entries/
+!server/bak
 
 # dependencies
 node_modules
