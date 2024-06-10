@@ -7,6 +7,7 @@ import { absolutePath, copyFile, deleteFile } from "./utils/utils.ts";
 import { Entry, UpdateEntry } from "../../types.ts";
 import { relativePath } from "./config.ts";
 import { decrypt, encrypt } from "./utils/crypto.ts";
+import crypto from "crypto";
 
 export class CebolaServer {
   static async createEntry(
@@ -14,7 +15,13 @@ export class CebolaServer {
       Entry,
       "date" | "previousEntryId" | "nextEntryId" | "keywords" | "id"
     >,
-    _id: string | null = null
+    _id: string | null = null,
+    /** Private key, is the combination of the username+password.
+     *
+     *  @example
+     *  "admin+12345" // this is the private key
+     * */
+    privateKey: string
   ) {
     if (!obj)
       throw new Error("createEntry() - Missing data. Can't create entry!");
@@ -23,6 +30,9 @@ export class CebolaServer {
     const filePath = absolutePath(relativePath.entry(uniqueID));
     const tailFilePath = absolutePath(relativePath.tail);
     const lastInsertedEntryId = await this.getTailId();
+
+    // Generate a random initialization vector for encryption
+    const iv = crypto.randomBytes(16).toString("hex");
 
     if (lastInsertedEntryId) {
       await this.smartBackup(lastInsertedEntryId);
@@ -34,12 +44,13 @@ export class CebolaServer {
         id: uniqueID,
         domain: obj.domain,
         username: obj.username,
-        password: obj.password,
+        password: encrypt(obj.password, privateKey, iv),
         description: obj.description,
         nextEntryId: null,
         previousEntryId: lastInsertedEntryId ? lastInsertedEntryId : null,
         date: new Date().toISOString(),
         keywords: [],
+        iv,
       };
 
       const jsonString = JSON.stringify(newEntry, null, 2);

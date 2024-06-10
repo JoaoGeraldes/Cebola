@@ -4,6 +4,7 @@ import { Entry, RequestPayload } from "../../types.ts";
 import { CebolaServer } from "./CebolaServer.ts";
 import { auth } from "./config.ts";
 import jwt from "jsonwebtoken";
+import { decrypt } from "./utils/crypto.ts";
 
 const app = express();
 const PORT = process.env.PORT || 9000;
@@ -35,10 +36,21 @@ function verifyJWTToken(req, res, next) {
   });
 }
 
+/* ------------------------------------- */
+/* --------- GET /VERIFY_TOKEN --------- */
+/* ------------------------------------- */
+app.post("/verify-token", verifyJWTToken, (req, res) => {
+  try {
+    res.status(200).json({ valid: true });
+  } catch {
+    res.status(401).json({ error: "invalid token" });
+  }
+});
+
 /* ------------------------------ */
 /* --------- GET /LOGIN --------- */
 /* ------------------------------ */
-app.post("/login", (req, res, next) => {
+app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
   // Check if the provided username and password match admin credentials
@@ -52,11 +64,11 @@ app.post("/login", (req, res, next) => {
     });
 
     // Set HttpOnly cookie
-    res.cookie("authToken", token, {
+    /*   res.cookie("authToken", token, {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-    });
+    }); */
 
     res.json({ token });
   } else {
@@ -85,6 +97,8 @@ app.get("/entries", verifyJWTToken, async (req, res) => {
     const entriesToSend: Entry[] = [];
     const entriesPerPage = parseInt(query.length) || 5;
 
+    const privateKey = `${auth.adminCredentials.username}+${auth.adminCredentials.password}`;
+
     if (query.cursor) {
       entry = await CebolaServer.getEntry(query.cursor);
     } else {
@@ -99,7 +113,7 @@ app.get("/entries", verifyJWTToken, async (req, res) => {
     if (entry) {
       for (let i = 0; i < entriesPerPage; i++) {
         /* const previous = await CebolaServer.getEntry(entry.id); */
-
+        entry.password = decrypt(entry.password, privateKey, entry.iv);
         entriesToSend.push(entry as Entry);
 
         if (!entry.previousEntryId) {
@@ -144,9 +158,15 @@ app.post("/entry", async (req, res) => {
       return;
     }
 
-    const hasSucceeded = await CebolaServer.createEntry({
-      ...requestPayload,
-    });
+    const privateKey = `${auth.adminCredentials.username}+${auth.adminCredentials.password}`;
+
+    const hasSucceeded = await CebolaServer.createEntry(
+      {
+        ...requestPayload,
+      },
+      null,
+      privateKey
+    );
 
     console.log("hasSucceeded", hasSucceeded);
     if (hasSucceeded) {

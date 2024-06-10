@@ -4,6 +4,7 @@ export const theme = {
     bg: "#4c5844",
     darkBg: "#3e4637",
     darkerBg: "#485440",
+    daGreen: "#31372d",
     lightBorder: "#64735b",
     darkBorder: "#30372a",
     yellow: "#c3b44f",

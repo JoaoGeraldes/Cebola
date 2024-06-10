@@ -15,6 +15,8 @@ export interface Entry {
   keywords: string[];
   previousEntryId: string | null;
   nextEntryId: string | null;
+  /** IV for encryption, should be stored in a hexadecimal string */
+  iv?: string;
 }
 
 export type UpdateEntry = Pick<Entry, "description" | "password"> &

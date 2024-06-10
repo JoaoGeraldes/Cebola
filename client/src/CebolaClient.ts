@@ -6,6 +6,7 @@ export class CebolaClient {
     "/entries": "/entries",
     "/entry": "/entry",
     "/login": "/login",
+    "/verify-token": "/verify-token",
   };
 
   static async updateEntry(entryId: string, payload: Partial<UpdateEntry>) {
@@ -84,7 +85,7 @@ export class CebolaClient {
     try {
       const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
         },
       });
       const json = await response.json();
@@ -97,7 +98,7 @@ export class CebolaClient {
   static async login(requestPayload: {
     username: string;
     password: string;
-  }): Promise<Entry[] | null> {
+  }): Promise<{ token: string } | null> {
     const url = `${this.endpoint.base}${this.endpoint["/login"]}`;
 
     try {
@@ -112,8 +113,34 @@ export class CebolaClient {
       const json = await response.json();
 
       if (json) {
-        sessionStorage.setItem("jwt", json.token);
+        localStorage.setItem("jwt", json.token);
       }
+      return json;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static async verifyToken(requestPayload: {
+    token: string;
+  }): Promise<{ valid: boolean } | null> {
+    const url = `${this.endpoint.base}${this.endpoint["/verify-token"]}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify(requestPayload),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+      const json = await response.json();
+
+      /*  if (json) {
+        localStorage.setItem("jwt", json.token);
+      } */
       return json;
     } catch (e) {
       return null;

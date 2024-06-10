@@ -9,13 +9,30 @@ import { theme } from "./theme";
 import { CebolaClient } from "./CebolaClient";
 import Plus from "./components/Icons/Plus";
 import RightArrow from "./components/Icons/RightArrow";
+import Login from "./components/Login";
 
 function App() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [cursor, setCursor] = useState<string | null | "last">(null);
   const [openNewEntryModal, setOpenNewEntryModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const hasEntries = entries && entries[0]?.id;
 
+  // Token verification for authentication
+  useEffect(() => {
+    async function verificationResult() {
+      const verificationResult = await CebolaClient.verifyToken({
+        token: localStorage.getItem("jwt") || "",
+      });
+
+      if (verificationResult?.valid) {
+        setIsAuthenticated(true);
+      }
+    }
+    verificationResult();
+  }, []);
+
+  // Download entries
   useEffect(() => {
     loadEntries();
   }, []);
@@ -47,7 +64,29 @@ function App() {
     }
   }
 
-  if (openNewEntryModal) {
+  if (!isAuthenticated) {
+    return (
+      <ThemeProvider theme={theme}>
+        <StyledModal>
+          <Login
+            onSubmit={async (inputData) => {
+              const respo = await CebolaClient.login({
+                username: inputData.username,
+                password: inputData.password,
+              });
+
+              if (respo?.token) {
+                setIsAuthenticated(true);
+                loadEntries(null);
+              }
+            }}
+          />
+        </StyledModal>
+      </ThemeProvider>
+    );
+  }
+
+  /*   if (openNewEntryModal) {
     return (
       <ThemeProvider theme={theme}>
         <StyledModal>
@@ -62,27 +101,19 @@ function App() {
         </StyledModal>
       </ThemeProvider>
     );
-  }
+  } */
 
   return (
     <ThemeProvider theme={theme}>
       <StyledApp className="App">
-        <button
-          onClick={() => {
-            CebolaClient.login({
-              username: "john",
-              password: "doe",
-            });
-          }}
-        >
-          Login
-        </button>
-        <div className="new-entry-section">
-          <Button onClick={() => setOpenNewEntryModal(true)}>
-            New entry &nbsp; <Plus fill={theme.color.yellow} />
-          </Button>
-        </div>
-        {/* <h1>Current cursor: {cursor}</h1> */}
+        {isAuthenticated && (
+          <div className="new-entry-section">
+            <Button onClick={() => setOpenNewEntryModal(true)}>
+              New entry &nbsp; <Plus fill={theme.color.yellow} />
+            </Button>
+          </div>
+        )}
+
         {hasEntries &&
           entries.map((entry) => (
             <Fragment key={entry.id}>
@@ -107,6 +138,19 @@ function App() {
           </Button>
         )}
       </StyledApp>
+
+      {openNewEntryModal && (
+        <StyledModal>
+          <EntryForm
+            onSubmit={async (formData) => {
+              await CebolaClient.createEntry(formData);
+              loadEntries(null);
+              setOpenNewEntryModal(false);
+            }}
+            onCancel={() => setOpenNewEntryModal(false)}
+          />
+        </StyledModal>
+      )}
     </ThemeProvider>
   );
 }
@@ -116,11 +160,14 @@ export default App;
 const StyledModal = styled("div")`
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  z-index: 50;
+  z-index: 100;
   position: absolute;
   padding: ${(props) => props.theme.padding.default};
+  top: 0;
+  background: ${(props) => props.theme.color.daGreen};
 `;
 
 const StyledApp = styled("div")`
