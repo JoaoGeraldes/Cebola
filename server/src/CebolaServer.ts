@@ -15,13 +15,7 @@ export class CebolaServer {
       Entry,
       "date" | "previousEntryId" | "nextEntryId" | "keywords" | "id"
     >,
-    _id: string | null = null,
-    /** Private key, is the combination of the username+password.
-     *
-     *  @example
-     *  "admin+12345" // this is the private key
-     * */
-    privateKey: string
+    _id: string | null = null
   ) {
     if (!obj)
       throw new Error("createEntry() - Missing data. Can't create entry!");
@@ -29,9 +23,6 @@ export class CebolaServer {
     const uniqueID = _id ? _id : createId();
     const filePath = absolutePath(relativePath.entry(uniqueID));
     const lastInsertedEntryId = await this.getTailId();
-
-    // Generate a random initialization vector for encryption
-    const iv = crypto.randomBytes(16).toString("hex");
 
     if (lastInsertedEntryId) {
       // Create backup for tail.json (if present)
@@ -47,13 +38,13 @@ export class CebolaServer {
         id: uniqueID,
         domain: obj.domain,
         username: obj.username,
-        password: encrypt(obj.password, privateKey, iv),
+        password: obj.password,
         description: obj.description,
         nextEntryId: null,
         previousEntryId: lastInsertedEntryId ? lastInsertedEntryId : null,
         date: new Date().toISOString(),
         keywords: [],
-        iv,
+        iv: obj.iv,
       };
 
       const jsonString = JSON.stringify(newEntry, null, 2);

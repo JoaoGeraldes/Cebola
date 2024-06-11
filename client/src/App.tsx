@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import "./App.css";
-import { Entry } from "../../types";
+import { Entry, NewEntry, User } from "../../types";
 import EntryCard from "./components/Entry";
 import EntryForm from "./components/EntryForm";
 import styled, { ThemeProvider } from "styled-components";
@@ -17,6 +17,8 @@ function App() {
   const [cursor, setCursor] = useState<string | null | "last">(null);
   const [openNewEntryModal, setOpenNewEntryModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
   const hasEntries = entries && entries[0]?.id;
 
   // Token verification for authentication
@@ -71,14 +73,12 @@ function App() {
         <StyledModal>
           <Login
             onSubmit={async (inputData) => {
-              const respo = await CebolaClient.login({
-                username: inputData.username,
-                password: inputData.password,
-              });
+              const respo = await CebolaClient.login(inputData);
 
               if (respo?.token) {
                 setIsAuthenticated(true);
                 loadEntries(null);
+                setUser(inputData);
               }
             }}
           />
@@ -87,8 +87,17 @@ function App() {
     );
   }
 
+  console.log("user", user);
+
   return (
     <ThemeProvider theme={theme}>
+      {!user && (
+        <h1>
+          User is not set. Even though you are logged in, you can't add entries.
+          Fix me! -{" "}
+          <button onClick={() => setIsAuthenticated(false)}>Logout</button>
+        </h1>
+      )}
       <StyledApp className="App">
         {isAuthenticated && (
           <div className="top-menu">
@@ -108,6 +117,7 @@ function App() {
           entries.map((entry) => (
             <Fragment key={entry.id}>
               <EntryCard
+                user={user}
                 entry={entry}
                 onDelete={async () => {
                   await handleEntryDelete(entry.id);
@@ -133,7 +143,20 @@ function App() {
         <StyledModal>
           <EntryForm
             onSubmit={async (formData) => {
-              await CebolaClient.createEntry(formData);
+              if (!user) return;
+
+              const cipher = await CebolaClient.encrypt(
+                formData.password,
+                `${user?.username}${user?.password}`
+              );
+
+              const updatedFormData: NewEntry = {
+                ...formData,
+                password: cipher.cipherText,
+                iv: cipher.ivText,
+              };
+
+              await CebolaClient.createEntry(updatedFormData);
               loadEntries(null);
               setOpenNewEntryModal(false);
             }}

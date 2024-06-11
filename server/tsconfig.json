@@ -21,6 +21,7 @@
     "esModuleInterop": true,
     // typescript options here
     "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "moduleResolution": "NodeNext",
+    "lib": ["es2021"]
   }
 }

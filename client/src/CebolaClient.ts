@@ -1,6 +1,7 @@
 import { Endpoints, Entry, NewEntry, UpdateEntry } from "../../types";
+import { CebolaCrypto } from "./CebolaCrypto";
 import { objectToQueryString } from "./utils";
-export class CebolaClient {
+export class CebolaClient extends CebolaCrypto {
   static endpoint = {
     base: "http://192.168.0.170:9000",
     "/entries": "/entries",

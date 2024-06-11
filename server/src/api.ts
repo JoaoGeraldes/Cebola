@@ -139,8 +139,6 @@ app.get("/entries", verifyJWTToken, async (req, res) => {
 
     if (entry) {
       for (let i = 0; i < entriesPerPage; i++) {
-        /* const previous = await CebolaServer.getEntry(entry.id); */
-        entry.password = decrypt(entry.password, privateKey, entry.iv);
         entriesToSend.push(entry as Entry);
 
         if (!entry.previousEntryId) {
@@ -185,14 +183,11 @@ app.post("/entry", async (req, res) => {
       return;
     }
 
-    const privateKey = `${auth.adminCredentials.username}+${auth.adminCredentials.password}`;
-
     const hasSucceeded = await CebolaServer.createEntry(
       {
         ...requestPayload,
       },
-      null,
-      privateKey
+      null
     );
 
     if (hasSucceeded) {

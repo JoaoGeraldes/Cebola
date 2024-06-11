@@ -15,7 +15,7 @@ export interface Entry {
   keywords: string[];
   previousEntryId: string | null;
   nextEntryId: string | null;
-  /** IV for encryption, should be stored in a hexadecimal string */
+  /** Initialization vector (IV) as string - used for encryption */
   iv?: string;
 }
 
@@ -23,7 +23,7 @@ export type UpdateEntry = Pick<Entry, "description" | "password"> &
   Pick<Partial<Entry>, "domain" | "username">;
 
 export type NewEntry = Partial<Pick<Entry, "domain" | "username">> &
-  Pick<Entry, "description" | "password">;
+  Pick<Entry, "description" | "password" | "iv">;
 
 export namespace RequestPayload {
   export namespace GET {
@@ -83,4 +83,9 @@ export interface Endpoints {
       body: NewEntry;
     };
   };
+}
+
+export interface User {
+  username: string;
+  password: string;
 }

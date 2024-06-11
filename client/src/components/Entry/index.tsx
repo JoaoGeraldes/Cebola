@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Entry, UpdateEntry } from "../../../../types";
+import { Entry, UpdateEntry, User } from "../../../../types";
 import Button from "../Button";
 import { useEffect, useState } from "react";
 import Input from "../Input";
@@ -9,15 +9,17 @@ import { theme } from "../../theme";
 import Bin from "../Icons/Bin";
 import Disk from "../Icons/Disk";
 import Return from "../Icons/Return";
+import { CebolaClient } from "../../CebolaClient";
 
 interface Props {
+  user: User | null;
   entry: Entry;
   onDelete: () => void;
   onSaveEdit: (editedData: Partial<UpdateEntry>) => void;
 }
 
 export default function EntryCard(props: Props) {
-  const { entry, onDelete, onSaveEdit } = props;
+  const { entry, onDelete, onSaveEdit, user } = props;
   const [entryInputsData, setEntryInputsData] = useState<Partial<UpdateEntry>>(
     {}
   );
@@ -28,6 +30,10 @@ export default function EntryCard(props: Props) {
   const [reveal, setReveal] = useState(false);
 
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const [decryptedPassword, setDecryptedPassword] = useState<string | null>(
+    null
+  );
 
   const date = new Date(entry.date);
 
@@ -101,6 +107,21 @@ export default function EntryCard(props: Props) {
     );
   }
 
+  async function handleReveal() {
+    console.log({
+      " entry.password,": entry.password,
+      "entry.iv!": entry.iv!,
+      priv: `${user?.username}+${user?.password}`,
+    });
+    const decrypted = await CebolaClient.decrypt(
+      entry.password,
+      entry.iv!,
+      `${user?.username}+${user?.password}`
+    );
+
+    console.log("decrypted", decrypted);
+  }
+
   return (
     <StyledEntry key={entry.id}>
       <div className="card">
@@ -130,7 +151,7 @@ export default function EntryCard(props: Props) {
             id="password"
             style={{ filter: reveal ? "unset" : "blur(3px)" }}
           >
-            {entry.password}
+            {decryptedPassword || entry.password}
           </span>
         )}
 
@@ -148,7 +169,7 @@ export default function EntryCard(props: Props) {
             <div className="copyreveal">
               {showPasswordMenu ? (
                 <>
-                  <Button id="password" onClick={() => setReveal(!reveal)}>
+                  <Button id="password" onClick={handleReveal}>
                     🔑 Reveal
                   </Button>
                   <Button onClick={() => copyToClipboard(entry.password)}>
