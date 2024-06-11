@@ -10,6 +10,7 @@ import { CebolaClient } from "./CebolaClient";
 import Plus from "./components/Icons/Plus";
 import RightArrow from "./components/Icons/RightArrow";
 import Login from "./components/Login";
+import Download from "./components/Icons/Download";
 
 function App() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
@@ -86,30 +87,19 @@ function App() {
     );
   }
 
-  /*   if (openNewEntryModal) {
-    return (
-      <ThemeProvider theme={theme}>
-        <StyledModal>
-          <EntryForm
-            onSubmit={async (formData) => {
-              await CebolaClient.createEntry(formData);
-              loadEntries(null);
-              setOpenNewEntryModal(false);
-            }}
-            onCancel={() => setOpenNewEntryModal(false)}
-          />
-        </StyledModal>
-      </ThemeProvider>
-    );
-  } */
-
   return (
     <ThemeProvider theme={theme}>
       <StyledApp className="App">
         {isAuthenticated && (
-          <div className="new-entry-section">
+          <div className="top-menu">
+            <Button onClick={() => CebolaClient.getBackup()}>
+              <Download fill={theme.color.yellow} />
+              &nbsp;Download
+            </Button>
+
             <Button onClick={() => setOpenNewEntryModal(true)}>
-              New entry &nbsp; <Plus fill={theme.color.yellow} />
+              <Plus fill={theme.color.yellow} />
+              &nbsp;New entry
             </Button>
           </div>
         )}
@@ -173,9 +163,9 @@ const StyledModal = styled("div")`
 const StyledApp = styled("div")`
   background: ${(props) => props.theme.bg};
   padding: ${(props) => props.theme.padding.default};
-  .new-entry-section {
+  .top-menu {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     margin: ${(props) => props.theme.margin.default} 0;
     z-index: 10;
   }
