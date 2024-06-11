@@ -1,4 +1,5 @@
-database
+server/database/entries/**
+*.zip
 
 # dependencies
 node_modules

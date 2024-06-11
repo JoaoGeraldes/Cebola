@@ -28,14 +28,17 @@ export class CebolaServer {
 
     const uniqueID = _id ? _id : createId();
     const filePath = absolutePath(relativePath.entry(uniqueID));
-    const tailFilePath = absolutePath(relativePath.tail);
     const lastInsertedEntryId = await this.getTailId();
 
     // Generate a random initialization vector for encryption
     const iv = crypto.randomBytes(16).toString("hex");
 
     if (lastInsertedEntryId) {
-      await this.smartBackup(lastInsertedEntryId);
+      // Create backup for tail.json (if present)
+      await copyFile(
+        absolutePath(relativePath.tail),
+        absolutePath(relativePath.tailBackup)
+      );
     }
 
     try {
@@ -59,8 +62,8 @@ export class CebolaServer {
 
       await fs.writeFile(filePath, jsonString, "utf8");
 
-      // Create copy for linked list Head
-      await fs.writeFile(tailFilePath, jsonString, "utf8");
+      // Create clone to tail.json
+      await fs.writeFile(absolutePath(relativePath.tail), jsonString, "utf8");
 
       // Link previous entry to this new entry
       if (lastInsertedEntryId) {
@@ -69,7 +72,10 @@ export class CebolaServer {
         });
       }
 
-      return true;
+      // Delete backup
+      await deleteFile(absolutePath(relativePath.tailBackup));
+
+      return newEntry;
     } catch (error) {
       console.error(
         `createEntry() - Error creating JSON file at ${filePath}:`,
@@ -111,7 +117,11 @@ export class CebolaServer {
 
     if (!fileExists) return;
 
-    await this.smartBackup(entryId);
+    // Create backup
+    await copyFile(
+      absolutePath(relativePath.entry(entryId)),
+      absolutePath(relativePath.entryBackup(entryId))
+    );
 
     try {
       const entryJson = await fs.readFile(filePath, "utf8");
@@ -125,8 +135,16 @@ export class CebolaServer {
 
       await fs.writeFile(filePath, jsonString, "utf8");
 
+      // Delete backup
+      await deleteFile(absolutePath(relativePath.entryBackup(entryId)));
+
       return JSON.parse(jsonString);
     } catch (error) {
+      // Recover backup
+      await copyFile(
+        absolutePath(relativePath.entryBackup(entryId)),
+        absolutePath(relativePath.entry(entryId))
+      );
       console.log(`updateEntry() - Error updating JSON file at ${filePath}:`);
       throw error;
     }
@@ -162,9 +180,29 @@ export class CebolaServer {
     );
     const entry: Partial<Entry> = JSON.parse(entryJSON);
 
-    await this.smartBackup(entryId);
-
     try {
+      // Create backups
+      await copyFile(
+        relativePath.entry(entry.id),
+        relativePath.entryBackup(entry.id)
+      );
+
+      // Create backups
+      if (entry.previousEntryId) {
+        await copyFile(
+          relativePath.entry(entry.previousEntryId),
+          relativePath.entryBackup(entry.previousEntryId)
+        );
+      }
+
+      // Create backups
+      if (entry.nextEntryId) {
+        await copyFile(
+          relativePath.entry(entry.nextEntryId),
+          relativePath.entryBackup(entry.nextEntryId)
+        );
+      }
+
       const entryPosition = this.entryPosition(entry);
 
       switch (entryPosition) {
@@ -203,7 +241,13 @@ export class CebolaServer {
       }
 
       // Delete backups after entry deletion is successful
-      await deleteFile(relativePath.entryBackup(entryId));
+      await deleteFile(absolutePath(relativePath.entryBackup(entryId)));
+      await deleteFile(
+        absolutePath(relativePath.entryBackup(entry.previousEntryId))
+      );
+      await deleteFile(
+        absolutePath(relativePath.entryBackup(entry.nextEntryId))
+      );
 
       // Delete tail files (original + backup) if this is the last entry
       if (!entry.previousEntryId && !entry.nextEntryId) {
@@ -245,241 +289,6 @@ export class CebolaServer {
         console.log(err);
       }
     });
-  }
-
-  /**
-   *
-   * @param entryId
-   *
-   * Creates backups of all files that are linked to a given entry
-   */
-  static async smartBackup(entryId: string) {
-    let caseSelectedTEmp = "";
-    try {
-      if (!entryId) throw new Error("Missing entry ID");
-
-      const fileExists = fs2.existsSync(
-        absolutePath(relativePath.entry(entryId))
-      );
-
-      if (!fileExists) return;
-
-      const entryJSON = await fs.readFile(
-        absolutePath(relativePath.entry(entryId)),
-        "utf8"
-      );
-
-      const entry: Partial<Entry> = JSON.parse(entryJSON);
-
-      const filesPath = {
-        tailFile: {
-          original: absolutePath(relativePath.tail),
-          backup: absolutePath(relativePath.tailBackup),
-        },
-        entryFile: {
-          original: absolutePath(relativePath.entry(entryId)),
-          backup: absolutePath(relativePath.entryBackup(entryId)),
-        },
-        previousEntryFile: {
-          original: absolutePath(relativePath.entry(entry.previousEntryId)),
-          backup: absolutePath(relativePath.entryBackup(entry.previousEntryId)),
-        },
-        nextEntryFile: {
-          original: absolutePath(relativePath.entryBackup(entry.nextEntryId)),
-          backup: absolutePath(relativePath.entryBackup(entry.nextEntryId)),
-        },
-      };
-
-      const hasTailFile = fs2.existsSync(filesPath.tailFile.original);
-      if (hasTailFile) {
-        await copyFile(filesPath.tailFile.original, filesPath.tailFile.backup);
-      }
-
-      switch (this.entryPosition(entry)) {
-        case "single":
-          caseSelectedTEmp = "single";
-          await copyFile(
-            filesPath.entryFile.original,
-            filesPath.entryFile.backup
-          );
-          break;
-        case "head":
-          caseSelectedTEmp = "head";
-          await copyFile(
-            filesPath.entryFile.original,
-            filesPath.entryFile.backup
-          );
-
-          await copyFile(
-            filesPath.nextEntryFile.original,
-            filesPath.nextEntryFile.backup
-          );
-          break;
-        case "body":
-          caseSelectedTEmp = "body";
-          await copyFile(
-            filesPath.entryFile.original,
-            filesPath.entryFile.backup
-          );
-
-          await copyFile(
-            filesPath.previousEntryFile.original,
-            filesPath.previousEntryFile.backup
-          );
-
-          await copyFile(
-            filesPath.nextEntryFile.original,
-            filesPath.nextEntryFile.backup
-          );
-          break;
-        case "tail":
-          caseSelectedTEmp = "tail";
-          await copyFile(
-            filesPath.entryFile.original,
-            filesPath.entryFile.backup
-          );
-
-          await copyFile(
-            filesPath.previousEntryFile.original,
-            filesPath.previousEntryFile.backup
-          );
-          break;
-
-        default:
-          break;
-      }
-    } catch (error) {
-      console.trace("smartBackup() - failed to create backups.", error.message);
-      throw error;
-    } finally {
-      console.log("SMART BACKUP CASE: " + caseSelectedTEmp);
-    }
-  }
-
-  /**
-   *
-   * @param entryId
-   * The files linked to a given entry are modified to its previous state (which is held by _backup.json files)
-   * Execute this to recover from previous state after a failure on any write (create or update) on entry(ies)
-   */
-  static async recoverFromSmartBackup(entryId: string) {
-    try {
-      const entryJSON = await fs.readFile(
-        absolutePath(relativePath.entry(entryId)),
-        "utf8"
-      );
-      const entry: Partial<Entry> = JSON.parse(entryJSON);
-
-      const filesPath = {
-        entryFile: {
-          original: relativePath.entry(entryId),
-          backup: relativePath.entryBackup(entryId),
-        },
-        previousEntryFile: {
-          original: relativePath.entry(entry.previousEntryId),
-          backup: relativePath.entryBackup(entry.previousEntryId),
-        },
-        nextEntryFile: {
-          original: relativePath.entryBackup(entry.nextEntryId),
-          backup: relativePath.entryBackup(entry.nextEntryId),
-        },
-      };
-
-      switch (this.entryPosition(entry)) {
-        case "single":
-          await copyFile(
-            filesPath.entryFile.backup,
-            filesPath.entryFile.original
-          );
-
-          break;
-
-        case "head":
-          await copyFile(
-            filesPath.entryFile.backup,
-            filesPath.entryFile.original
-          );
-
-          await copyFile(
-            filesPath.nextEntryFile.backup,
-            filesPath.nextEntryFile.original
-          );
-
-          break;
-
-        case "body":
-          await copyFile(
-            filesPath.entryFile.backup,
-            filesPath.entryFile.original
-          );
-
-          await copyFile(
-            filesPath.previousEntryFile.backup,
-            filesPath.previousEntryFile.original
-          );
-
-          await copyFile(
-            filesPath.nextEntryFile.backup,
-            filesPath.nextEntryFile.original
-          );
-
-          break;
-
-        case "tail":
-          await copyFile(
-            filesPath.entryFile.backup,
-            filesPath.entryFile.original
-          );
-
-          await copyFile(
-            filesPath.previousEntryFile.backup,
-            filesPath.previousEntryFile.original
-          );
-
-          break;
-
-        default:
-          break;
-      }
-    } catch (error) {
-      console.log(
-        "recoverFromSmartBackup() - Error resetting entry from backup.",
-        error.message
-      );
-      throw error.message;
-    }
-  }
-
-  static async smartBackupDelete(entryId: string) {
-    try {
-      if (!entryId) return;
-
-      const entryJSON = await fs.readFile(
-        absolutePath(relativePath.entry(entryId)),
-        "utf8"
-      );
-      const entry: Partial<Entry> = JSON.parse(entryJSON);
-
-      const filesPath = {
-        entryFile: {
-          backup: relativePath.entryBackup(entryId),
-        },
-        previousEntryFile: {
-          backup: relativePath.entryBackup(entry.previousEntryId),
-        },
-        nextEntryFile: {
-          backup: relativePath.entryBackup(entry.nextEntryId),
-        },
-      };
-      console.log("ATTEEMMPT TO DELETE", filesPath.entryFile.backup);
-      await deleteFile(filesPath.entryFile.backup);
-    } catch (error) {
-      console.log(
-        "smartBackupDelete() - Error deleting backup!",
-        error.message
-      );
-      throw error.message;
-    }
   }
 
   static entryPosition(

@@ -7,6 +7,7 @@ export class CebolaClient {
     "/entry": "/entry",
     "/login": "/login",
     "/verify-token": "/verify-token",
+    "/backup": "/backup",
   };
 
   static async updateEntry(entryId: string, payload: Partial<UpdateEntry>) {
@@ -26,7 +27,6 @@ export class CebolaClient {
       });
 
       const json = await response.json();
-      console.log("RESPOSNE,", json);
       return response;
     } catch {
       return null;
@@ -142,6 +142,42 @@ export class CebolaClient {
         localStorage.setItem("jwt", json.token);
       } */
       return json;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static async getBackup() {
+    const url = `${this.endpoint.base}${this.endpoint["/backup"]}`;
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          mode: "cors",
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          "Content-Type": "application/zip",
+        },
+      });
+
+      const datetime = new Date();
+      const date = datetime.toLocaleDateString().replaceAll("/", "-");
+      const time = datetime.toLocaleTimeString().replaceAll(":", ".");
+      const filename = `${date}_${time}_database.zip`;
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+
+      return blob;
     } catch (e) {
       return null;
     }

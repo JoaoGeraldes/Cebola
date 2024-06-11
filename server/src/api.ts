@@ -5,6 +5,8 @@ import { CebolaServer } from "./CebolaServer.ts";
 import { auth } from "./config.ts";
 import jwt from "jsonwebtoken";
 import { decrypt } from "./utils/crypto.ts";
+import { getFileSize, zipDirectory } from "./utils/utils.ts";
+import { existsSync } from "fs";
 
 const app = express();
 const PORT = process.env.PORT || 9000;
@@ -44,6 +46,31 @@ app.post("/verify-token", verifyJWTToken, (req, res) => {
     res.status(200).json({ valid: true });
   } catch {
     res.status(401).json({ error: "invalid token" });
+  }
+});
+
+/* ------------------------------- */
+/* --------- GET /BACKUP --------- */
+/* ------------------------------- */
+app.get("/backup", verifyJWTToken, async (req, res) => {
+  try {
+    const zipFilePath = await zipDirectory();
+
+    const fileExists = existsSync(zipFilePath);
+
+    if (!fileExists) {
+      res.status(404).json({ error: ".zip backup file not found." });
+      return;
+    }
+
+    const fileSize = getFileSize(zipFilePath);
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Length", fileSize);
+
+    res.download(zipFilePath);
+  } catch {
+    res.status(500).json({ error: "Something went wrong." });
   }
 });
 
@@ -168,7 +195,6 @@ app.post("/entry", async (req, res) => {
       privateKey
     );
 
-    console.log("hasSucceeded", hasSucceeded);
     if (hasSucceeded) {
       req.res.status(200).send(requestPayload);
       return;
