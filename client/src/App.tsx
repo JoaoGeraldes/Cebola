@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, createContext, useEffect, useState } from "react";
 import "./App.css";
 import { Entry, NewEntry, User } from "../../types";
 import EntryCard from "./components/Entry";
@@ -11,13 +11,30 @@ import Plus from "./components/Icons/Plus";
 import RightArrow from "./components/Icons/RightArrow";
 import Login from "./components/Login";
 import Download from "./components/Icons/Download";
+import Message from "./components/Message";
+
+export const UserContext = createContext<User>({
+  username: null,
+  password: null,
+});
+export const MessageContext = createContext<{
+  message: string | null;
+  setMessage: React.Dispatch<React.SetStateAction<string | null>>;
+}>({
+  message: null,
+  setMessage: () => null,
+});
 
 function App() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [cursor, setCursor] = useState<string | null | "last">(null);
   const [openNewEntryModal, setOpenNewEntryModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>({
+    username: null,
+    password: null,
+  });
+  const [message, setMessage] = useState<string | null>(null);
 
   const hasEntries = entries && entries[0]?.id;
 
@@ -35,10 +52,30 @@ function App() {
     verificationResult();
   }, []);
 
-  // Download entries
+  // First attempt to load entries
   useEffect(() => {
     loadEntries();
   }, []);
+
+  // get stored user (session storage)
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem("user");
+    if (storedUser) {
+      const userObject: User = JSON.parse(storedUser);
+
+      setUser({
+        username: userObject.username,
+        password: userObject.password,
+      });
+    }
+  }, []);
+
+  // Verify if authenticated but without local user
+  useEffect(() => {
+    if (isAuthenticated && !user.username && !user.password) {
+      setMessage("You need to re-authenticate to decrypt the passwords.");
+    }
+  }, [isAuthenticated, user]);
 
   async function loadEntries(_cursor?: string | null) {
     const result = await CebolaClient.getEntries({
@@ -88,83 +125,94 @@ function App() {
   }
 
   console.log("user", user);
-
   return (
-    <ThemeProvider theme={theme}>
-      {!user && (
-        <h1>
-          User is not set. Even though you are logged in, you can't add entries.
-          Fix me! -{" "}
-          <button onClick={() => setIsAuthenticated(false)}>Logout</button>
-        </h1>
-      )}
-      <StyledApp className="App">
-        {isAuthenticated && (
-          <div className="top-menu">
-            <Button onClick={() => CebolaClient.getBackup()}>
-              <Download fill={theme.color.yellow} />
-              &nbsp;Download
-            </Button>
-
-            <Button onClick={() => setOpenNewEntryModal(true)}>
-              <Plus fill={theme.color.yellow} />
-              &nbsp;New entry
-            </Button>
-          </div>
-        )}
-
-        {hasEntries &&
-          entries.map((entry) => (
-            <Fragment key={entry.id}>
-              <EntryCard
-                user={user}
-                entry={entry}
-                onDelete={async () => {
-                  await handleEntryDelete(entry.id);
-                  loadEntries(entry.nextEntryId);
-                }}
-                onSaveEdit={async (editedData) => {
-                  await CebolaClient.updateEntry(entry.id, editedData);
-                  loadEntries(cursor);
-                }}
-              />
-            </Fragment>
-          ))}
-
-        {hasEntries && (
-          <Button onClick={() => loadEntries(cursor)}>
-            <RightArrow fill={theme.color.yellow} />
-            &nbsp; Next
-          </Button>
-        )}
-      </StyledApp>
-
-      {openNewEntryModal && (
-        <StyledModal>
-          <EntryForm
-            onSubmit={async (formData) => {
-              if (!user) return;
-
-              const cipher = await CebolaClient.encrypt(
-                formData.password,
-                `${user?.username}${user?.password}`
-              );
-
-              const updatedFormData: NewEntry = {
-                ...formData,
-                password: cipher.cipherText,
-                iv: cipher.ivText,
-              };
-
-              await CebolaClient.createEntry(updatedFormData);
-              loadEntries(null);
-              setOpenNewEntryModal(false);
-            }}
-            onCancel={() => setOpenNewEntryModal(false)}
+    <UserContext.Provider value={user}>
+      <MessageContext.Provider value={{ message, setMessage }}>
+        <ThemeProvider theme={theme}>
+          <Message
+            message={message}
+            onDismiss={
+              !user.username || !user.password
+                ? () => setIsAuthenticated(false)
+                : null
+            }
           />
-        </StyledModal>
-      )}
-    </ThemeProvider>
+          {!user && (
+            <h1>
+              User is not set. Even though you are logged in, you can't add
+              entries. Fix me! -{" "}
+              <button onClick={() => setIsAuthenticated(false)}>Logout</button>
+            </h1>
+          )}
+          <StyledApp className="App">
+            {isAuthenticated && (
+              <div className="top-menu">
+                <Button onClick={() => CebolaClient.getBackup()}>
+                  <Download fill={theme.color.yellow} />
+                  &nbsp;Download
+                </Button>
+
+                <Button onClick={() => setOpenNewEntryModal(true)}>
+                  <Plus fill={theme.color.yellow} />
+                  &nbsp;New entry
+                </Button>
+              </div>
+            )}
+
+            {hasEntries &&
+              entries.map((entry) => (
+                <Fragment key={entry.id}>
+                  <EntryCard
+                    entry={entry}
+                    onDelete={async () => {
+                      await handleEntryDelete(entry.id);
+                      loadEntries(entry.nextEntryId);
+                    }}
+                    onSaveEdit={async (editedData) => {
+                      await CebolaClient.updateEntry(entry.id, editedData);
+                      loadEntries(cursor);
+                    }}
+                  />
+                </Fragment>
+              ))}
+
+            {hasEntries && (
+              <Button onClick={() => loadEntries(cursor)}>
+                <RightArrow fill={theme.color.yellow} />
+                &nbsp; Next
+              </Button>
+            )}
+          </StyledApp>
+
+          {openNewEntryModal && (
+            <StyledModal>
+              <EntryForm
+                onSubmit={async (formData) => {
+                  if (!user) return;
+
+                  console.log("Will encrypt: ", formData.password);
+                  const encrypted = await CebolaClient.encrypt(
+                    formData.password,
+                    `${user?.username}+${user?.password}`
+                  );
+
+                  const updatedFormData: NewEntry = {
+                    ...formData,
+                    password: encrypted.cipherText,
+                    iv: encrypted.ivText,
+                  };
+
+                  await CebolaClient.createEntry(updatedFormData);
+                  loadEntries(null);
+                  setOpenNewEntryModal(false);
+                }}
+                onCancel={() => setOpenNewEntryModal(false)}
+              />
+            </StyledModal>
+          )}
+        </ThemeProvider>
+      </MessageContext.Provider>
+    </UserContext.Provider>
   );
 }
 
@@ -189,7 +237,6 @@ const StyledApp = styled("div")`
   .top-menu {
     display: flex;
     justify-content: space-between;
-    margin: ${(props) => props.theme.margin.default} 0;
     z-index: 10;
   }
 `;

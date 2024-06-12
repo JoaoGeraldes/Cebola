@@ -32,7 +32,6 @@ export class CebolaCrypto {
       const iv = this.base64ToUint8Array(ivText);
       const privateKey = await this.deriveKey(plainTextPrivateKey);
 
-      console.log({ cipher, iv, privateKey });
       const plainText = await crypto.subtle.decrypt(
         {
           name: "AES-GCM",
@@ -45,7 +44,7 @@ export class CebolaCrypto {
       const decoder = new TextDecoder();
       return decoder.decode(plainText);
     } catch (e) {
-      throw e;
+      throw new Error("Failed to decrypt. Additional information: " + e);
     }
   }
 

@@ -10,6 +10,7 @@ export const theme = {
     yellow: "#c3b44f",
     greeen: "#66ff00",
     label: "#a2b298",
+    bafgreen: "#baff76",
   },
 
   margin: {

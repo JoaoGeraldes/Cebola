@@ -86,6 +86,6 @@ export interface Endpoints {
 }
 
 export interface User {
-  username: string;
-  password: string;
+  username: string | null;
+  password: string | null;
 }

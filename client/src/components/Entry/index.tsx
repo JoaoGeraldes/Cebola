@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { Entry, UpdateEntry, User } from "../../../../types";
 import Button from "../Button";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Input from "../Input";
 import ChevronUp from "../Icons/ChevronUp";
 import Pencil from "../Icons/Pencil";
@@ -10,16 +10,19 @@ import Bin from "../Icons/Bin";
 import Disk from "../Icons/Disk";
 import Return from "../Icons/Return";
 import { CebolaClient } from "../../CebolaClient";
+import { MessageContext, UserContext } from "../../App";
 
 interface Props {
-  user: User | null;
   entry: Entry;
   onDelete: () => void;
   onSaveEdit: (editedData: Partial<UpdateEntry>) => void;
 }
 
 export default function EntryCard(props: Props) {
-  const { entry, onDelete, onSaveEdit, user } = props;
+  const { entry, onDelete, onSaveEdit } = props;
+  const user = useContext(UserContext);
+  const { setMessage } = useContext(MessageContext);
+
   const [entryInputsData, setEntryInputsData] = useState<Partial<UpdateEntry>>(
     {}
   );
@@ -108,18 +111,23 @@ export default function EntryCard(props: Props) {
   }
 
   async function handleReveal() {
-    console.log({
-      " entry.password,": entry.password,
-      "entry.iv!": entry.iv!,
-      priv: `${user?.username}+${user?.password}`,
-    });
-    const decrypted = await CebolaClient.decrypt(
-      entry.password,
-      entry.iv!,
-      `${user?.username}+${user?.password}`
-    );
+    try {
+      if (decryptedPassword) {
+        setReveal(!reveal);
+        return;
+      }
 
-    console.log("decrypted", decrypted);
+      const decrypted = await CebolaClient.decrypt(
+        entry.password,
+        entry.iv!,
+        `${user?.username}+${user?.password}`
+      );
+
+      setDecryptedPassword(decrypted);
+      setReveal(true);
+    } catch {
+      setMessage("Failed to reveal (decrypt) the password.");
+    }
   }
 
   return (
@@ -151,7 +159,7 @@ export default function EntryCard(props: Props) {
             id="password"
             style={{ filter: reveal ? "unset" : "blur(3px)" }}
           >
-            {decryptedPassword || entry.password}
+            {(reveal && decryptedPassword) || entry.password}
           </span>
         )}
 
@@ -169,7 +177,7 @@ export default function EntryCard(props: Props) {
             <div className="copyreveal">
               {showPasswordMenu ? (
                 <>
-                  <Button id="password" onClick={handleReveal}>
+                  <Button id="password-btn" onClick={handleReveal}>
                     🔑 Reveal
                   </Button>
                   <Button onClick={() => copyToClipboard(entry.password)}>
@@ -233,6 +241,14 @@ const StyledEntry = styled("div")`
   align-items: center;
   margin-top: ${(props) => props.theme.margin.default};
   margin-bottom: ${(props) => props.theme.margin.default};
+
+  span {
+    overflow-wrap: break-word;
+  }
+
+  #password {
+    color: ${(props) => props.theme.color.bafgreen};
+  }
 
   .date {
     display: flex;

@@ -115,6 +115,13 @@ export class CebolaClient extends CebolaCrypto {
 
       if (json) {
         localStorage.setItem("jwt", json.token);
+        sessionStorage.setItem(
+          "user",
+          JSON.stringify({
+            username: requestPayload.username,
+            password: requestPayload.password,
+          })
+        );
       }
       return json;
     } catch (e) {
