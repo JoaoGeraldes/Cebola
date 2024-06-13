@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Entry, UpdateEntry, User } from "../../../../types";
+import { Entry, UpdateEntry } from "../../../../types";
 import Button from "../Button";
 import { useContext, useEffect, useState } from "react";
 import Input from "../Input";
@@ -11,6 +11,8 @@ import Disk from "../Icons/Disk";
 import Return from "../Icons/Return";
 import { CebolaClient } from "../../CebolaClient";
 import { MessageContext, UserContext } from "../../App";
+import Horus from "../Icons/Horus";
+import Clipboard from "../Icons/Clipboard";
 
 interface Props {
   entry: Entry;
@@ -23,12 +25,9 @@ export default function EntryCard(props: Props) {
   const user = useContext(UserContext);
   const { setMessage } = useContext(MessageContext);
 
-  const [entryInputsData, setEntryInputsData] = useState<Partial<UpdateEntry>>(
-    {}
-  );
+  const [entryInputsData, setEntryInputsData] =
+    useState<Partial<UpdateEntry> | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-
-  const [showPasswordMenu, setShowPasswordMenu] = useState(false);
 
   const [reveal, setReveal] = useState(false);
 
@@ -47,33 +46,65 @@ export default function EntryCard(props: Props) {
 
   useEffect(() => {
     setIsEditing(false);
-  }, [entry]);
+
+    const handleAsyncDecrypt = async () => {
+      try {
+        if (entry.password && entry.iv && user.username && user.password) {
+          const decrypted = await CebolaClient.decrypt(
+            entry.password,
+            entry.iv,
+            `${user.username}+${user.password}`
+          );
+
+          setDecryptedPassword(decrypted);
+        }
+      } catch {
+        setMessage("Failed to decrypt.");
+      }
+    };
+
+    handleAsyncDecrypt();
+  }, [entry.id, user.username, user.password]);
 
   function handleDelete() {
     onDelete();
   }
 
-  function handleOnEditSave() {
-    onSaveEdit(entryInputsData);
+  function handleOnEditSave(
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) {
+    if (e) {
+      e.preventDefault();
+    }
+
+    if (entryInputsData) {
+      onSaveEdit(entryInputsData);
+    }
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const id = e.target.id;
     const value = e.target.value;
-
-    setEntryInputsData({ ...entryInputsData, [id]: value });
+    const inputsData = { ...entryInputsData } as Partial<UpdateEntry>;
+    setEntryInputsData({ ...inputsData, [id]: value });
   }
 
-  function copyToClipboard(text: string) {
+  async function copyToClipboard(text: string) {
     try {
-      navigator.clipboard.writeText(text);
-      alert("Copied to clipboard ✅");
+      const decrypted = await CebolaClient.decrypt(
+        entry.password,
+        entry.iv!,
+        `${user.username}+${user.password}`
+      );
+
+      navigator.clipboard.writeText(decrypted);
+      setMessage("Copied to clipboard!");
     } catch {
-      alert("Failed to copy to clipboard.");
+      setMessage("Failed to copy to clipboard.");
     }
   }
 
-  const dateSection = (
+  const DateSection = (
     <div className="date" onClick={() => setIsExpanded(!isExpanded)}>
       <small>
         {/*   {formattedDate.time}  */}
@@ -89,151 +120,186 @@ export default function EntryCard(props: Props) {
     </div>
   );
 
-  if (!isExpanded) {
-    return (
-      <StyledEntry key={entry.id}>
-        <div className="card">
-          {dateSection}
-          <label htmlFor="description">description</label>
-          {isEditing ? (
-            <Input
-              onChange={handleInputChange}
-              id="description"
-              type="text"
-              value={entryInputsData.description ?? entry.description}
-            />
-          ) : (
-            <span id="description">{entry.description}</span>
-          )}
-        </div>
-      </StyledEntry>
-    );
-  }
-
-  async function handleReveal() {
-    try {
-      if (decryptedPassword) {
-        setReveal(!reveal);
-        return;
-      }
-
-      const decrypted = await CebolaClient.decrypt(
-        entry.password,
-        entry.iv!,
-        `${user?.username}+${user?.password}`
-      );
-
-      setDecryptedPassword(decrypted);
-      setReveal(true);
-    } catch {
-      setMessage("Failed to reveal (decrypt) the password.");
-    }
-  }
-
   return (
     <StyledEntry key={entry.id}>
       <div className="card">
-        {dateSection}
-        <label htmlFor="description">description</label>
+        <small>
+          {JSON.stringify({
+            entry: entry.password,
+            username: user.username,
+            password: user.password,
+          })}
+        </small>
+        {DateSection}
+
         {isEditing ? (
-          <Input
-            onChange={handleInputChange}
-            id="description"
-            type="text"
-            value={entryInputsData.description ?? entry.description}
+          <DisplayEditForm
+            entry={entry}
+            entryInputsData={entryInputsData}
+            handleInputChange={handleInputChange}
+            handleOnEditSave={handleOnEditSave}
+            setIsEditing={setIsEditing}
+            decryptedPassword={decryptedPassword}
           />
         ) : (
-          <span id="description">{entry.description}</span>
-        )}
-
-        {entry?.password && <label htmlFor="password">password</label>}
-        {isEditing ? (
-          <Input
-            onChange={handleInputChange}
-            id="password"
-            type="text"
-            value={entryInputsData.password ?? entry.password}
+          <DisplayEntry
+            decryptedPassword={decryptedPassword}
+            entry={entry}
+            entryInputsData={entryInputsData}
+            handleInputChange={handleInputChange}
+            handleOnEditSave={handleOnEditSave}
+            isExpanded={isExpanded}
+            setIsEditing={setIsEditing}
+            copyToClipboard={copyToClipboard}
+            handleDelete={handleDelete}
+            setReveal={setReveal}
+            reveal={reveal}
           />
-        ) : (
-          <span
-            id="password"
-            style={{ filter: reveal ? "unset" : "blur(3px)" }}
-          >
-            {(reveal && decryptedPassword) || entry.password}
-          </span>
         )}
-
-        {entry?.domain && <label htmlFor="domain">domain</label>}
-        {isEditing ? (
-          <Input
-            onChange={handleInputChange}
-            id="domain"
-            type="text"
-            value={entryInputsData.domain ?? entry.domain}
-          />
-        ) : (
-          <>
-            <span id="domain">{entry.domain}</span>
-            <div className="copyreveal">
-              {showPasswordMenu ? (
-                <>
-                  <Button id="password-btn" onClick={handleReveal}>
-                    🔑 Reveal
-                  </Button>
-                  <Button onClick={() => copyToClipboard(entry.password)}>
-                    📋 Copy
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={() => setShowPasswordMenu(!showPasswordMenu)}>
-                  ...
-                </Button>
-              )}
-            </div>
-          </>
-        )}
-
-        {entry?.username && <label htmlFor="username">username</label>}
-        {isEditing ? (
-          <Input
-            onChange={handleInputChange}
-            id="username"
-            type="text"
-            value={entryInputsData.username ?? entry.username}
-          />
-        ) : (
-          <span id="username">{entry.username}</span>
-        )}
-
-        <div className="actions">
-          {isEditing ? (
-            <Button onClick={() => setIsEditing(false)}>
-              <Return fill={theme.color.yellow} />
-              &nbsp; Cancel
-            </Button>
-          ) : (
-            <Button onClick={() => setIsEditing(true)}>
-              <Pencil fill={theme.color.yellow} />
-              &nbsp; Edit
-            </Button>
-          )}
-
-          {isEditing ? (
-            <Button onClick={handleOnEditSave}>
-              <Disk fill={theme.color.yellow} />
-              &nbsp;Save
-            </Button>
-          ) : (
-            <Button onClick={handleDelete}>
-              <Bin fill={theme.color.yellow} />
-              &nbsp;Delete
-            </Button>
-          )}
-        </div>
       </div>
     </StyledEntry>
   );
 }
+
+const DisplayEditForm = (props: {
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  entryInputsData: Partial<UpdateEntry> | null;
+  entry: Entry;
+  decryptedPassword: string | null;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
+  handleOnEditSave: (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void;
+}) => {
+  const {
+    entry,
+    setIsEditing,
+    entryInputsData,
+    decryptedPassword,
+    handleOnEditSave,
+    handleInputChange,
+  } = props;
+
+  return (
+    <form>
+      <label htmlFor="description">description</label>
+      <Input
+        onChange={handleInputChange}
+        id="description"
+        type="text"
+        value={entryInputsData?.description ?? entry.description}
+      />
+
+      <label htmlFor="password">password</label>
+      <Input
+        onChange={handleInputChange}
+        id="password"
+        type="text"
+        value={entryInputsData?.password ?? (decryptedPassword || "")}
+      />
+
+      <label htmlFor="domain">domain</label>
+      <Input
+        onChange={handleInputChange}
+        id="domain"
+        type="text"
+        value={entryInputsData?.domain ?? entry.domain}
+      />
+
+      <label htmlFor="username">username</label>
+      <Input
+        onChange={handleInputChange}
+        id="username"
+        type="text"
+        value={entryInputsData?.username ?? entry.username}
+      />
+
+      <div className="actions">
+        <Button onClick={handleOnEditSave}>
+          <Disk fill={theme.color.yellow} />
+          &nbsp;Save
+        </Button>
+        <Button onClick={() => setIsEditing(false)}>
+          <Return fill={theme.color.yellow} />
+          &nbsp; Cancel
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+const DisplayEntry = (props: {
+  reveal: boolean;
+  setReveal: React.Dispatch<React.SetStateAction<boolean>>;
+  isExpanded: boolean;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleDelete: () => void;
+  copyToClipboard: (text: string) => Promise<void>;
+  entryInputsData: Partial<UpdateEntry> | null;
+  entry: Entry;
+  decryptedPassword: string | null;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
+  handleOnEditSave: (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => void;
+}) => {
+  const {
+    entry,
+    setIsEditing,
+    decryptedPassword,
+    copyToClipboard,
+    handleDelete,
+    setReveal,
+    reveal,
+    isExpanded,
+  } = props;
+
+  return isExpanded ? (
+    <>
+      <label htmlFor="description">description</label>
+      <span id="description">{entry.description}</span>
+
+      <label htmlFor="password">password</label>
+      <div className="password-container">
+        <span id="password" style={{ filter: reveal ? "unset" : "blur(3px)" }}>
+          {(reveal && decryptedPassword) || entry.password}
+        </span>
+
+        <div className="password-actions">
+          <Button id="password-btn" onClick={() => setReveal(!reveal)}>
+            <Horus fill={theme.color.yellow} />
+          </Button>
+          <Button onClick={() => copyToClipboard(entry.password)}>
+            <Clipboard fill={theme.color.yellow} />
+          </Button>
+        </div>
+      </div>
+
+      {entry?.domain && <label htmlFor="domain">domain</label>}
+      <span id="domain">{entry.domain}</span>
+
+      {entry?.username && <label htmlFor="username">username</label>}
+      <span id="username">{entry.username}</span>
+
+      <div className="actions">
+        <Button onClick={handleDelete}>
+          <Bin fill={theme.color.yellow} />
+          &nbsp;Delete
+        </Button>
+
+        <Button onClick={() => setIsEditing(true)}>
+          <Pencil fill={theme.color.yellow} />
+          &nbsp; Edit
+        </Button>
+      </div>
+    </>
+  ) : (
+    <>
+      <label htmlFor="description">description</label>
+      <span id="description">{entry.description}</span>
+    </>
+  );
+};
 
 const StyledEntry = styled("div")`
   display: flex;
@@ -241,6 +307,15 @@ const StyledEntry = styled("div")`
   align-items: center;
   margin-top: ${(props) => props.theme.margin.default};
   margin-bottom: ${(props) => props.theme.margin.default};
+  .password-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    .password-actions {
+      display: flex;
+    }
+  }
 
   span {
     overflow-wrap: break-word;
@@ -269,17 +344,6 @@ const StyledEntry = styled("div")`
     width: 100%;
   }
 
-  .copyreveal {
-    background: linear-gradient(
-      90deg,
-      #485440d1,
-      ${(props) => props.theme.color.darkerBg}
-    );
-    position: absolute;
-    right: 0;
-    top: 37%;
-  }
-
   .card {
     width: 100%;
     display: flex;
@@ -287,7 +351,7 @@ const StyledEntry = styled("div")`
     align-items: flex-start;
     background: ${(props) => props.theme.color.darkerBg};
     padding: ${(props) => props.theme.padding.default};
-    box-shadow: 1px 1px 0px 0px #37442e;
+    box-shadow: ${(props) => props.theme.boxShadow.subtle};
     position: relative;
 
     span {

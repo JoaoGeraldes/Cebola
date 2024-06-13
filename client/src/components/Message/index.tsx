@@ -1,7 +1,6 @@
 import { useContext, useEffect } from "react";
 import styled from "styled-components";
 import { MessageContext } from "../../App";
-import Button from "../Button";
 
 interface Props {
   message?: string | null;
@@ -16,9 +15,18 @@ export default function Message(props: Props) {
 
   return (
     <MessageWrapper>
-      <div className="message">
-        <p>{message}</p>
-        <Button
+      <div
+        className="message"
+        onClick={() => {
+          if (onDismiss) {
+            onDismiss();
+          }
+
+          setMessage(null);
+        }}
+      >
+        <small>{message}</small>
+        {/* <Button
           onClick={() => {
             if (onDismiss) {
               onDismiss();
@@ -28,7 +36,7 @@ export default function Message(props: Props) {
           }}
         >
           ok
-        </Button>
+        </Button> */}
       </div>
     </MessageWrapper>
   );
@@ -40,6 +48,8 @@ const MessageWrapper = styled("div")`
   flex-direction: row;
   justify-content: center;
   width: 100%;
+  cursor: pointer;
+  box-shadow: ${(props) => props.theme.boxShadow.subtle};
 
   .message {
     display: flex;
@@ -52,7 +62,7 @@ const MessageWrapper = styled("div")`
     align-items: center;
     animation: slideDown 0.2s;
     top: 0;
-    position: absolute;
+    position: fixed;
     z-index: 100;
   }
 

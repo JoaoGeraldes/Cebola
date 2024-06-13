@@ -23,11 +23,12 @@ const StyledButton = styled("button")<Props>`
   color: ${(props) => props.theme.color.yellow};
   cursor: pointer;
   padding: 0.4em 0.6em;
+  height: 36px;
   /* margin: ${(props) => props.theme.margin.default}; */
 
   &:hover {
     color: ${(props) => props.theme.color.yellow};
-    transition: all 0.25s;
+    transition: background 0.25s;
     background: ${(props) => props.theme.color.darkBg};
   }
 
@@ -37,5 +38,9 @@ const StyledButton = styled("button")<Props>`
     border-bottom: 1px solid ${(props) => props.theme.color.lightBorder};
     border-right: unset;
     background: ${(props) => props.theme.color.bg};
+  }
+
+  &:focus-visible {
+    outline: none;
   }
 `;

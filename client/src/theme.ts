@@ -20,6 +20,12 @@ export const theme = {
 
   padding: {
     default: "8px",
+    lil: "4px",
+    box: "16px",
+  },
+
+  boxShadow: {
+    subtle: "0px 1px 1px #00000085",
   },
 };
 

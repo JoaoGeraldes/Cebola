@@ -35,6 +35,8 @@ export default function EntryForm(props: Props) {
     onSubmit(formData);
   }
 
+  const requiredIcon = <span className="required">&#x2605;</span>;
+
   return (
     <StyledForm onSubmit={handleSubmit}>
       <div className="limiter">
@@ -42,16 +44,16 @@ export default function EntryForm(props: Props) {
           <Plus fill={theme.color.lightBorder} /> Add new entry
         </h1>
         <span className="hint">
-          <i>* required fields</i>
+          <i>{requiredIcon} - <small>required fields</small></i>
         </span>
-        <label htmlFor="description">🧅 Description *</label>
+        <label htmlFor="description">Description {requiredIcon}</label>
         <Input
           required
           id="description"
           onChange={handleInputChange}
           type="text"
         />
-        <label htmlFor="password">🔑 Password *</label>
+        <label htmlFor="password">Password {requiredIcon}</label>
         <Input
           required
           onChange={handleInputChange}
@@ -83,7 +85,10 @@ const StyledForm = styled("form")`
   justify-content: center;
   align-items: center;
   width: 100%;
+  max-width: 700px;
   animation: fadeIn 0.3s;
+  background: ${(props) => props.theme.color.bg};
+  padding: ${(props) => props.theme.padding.box};
 
   h1 {
     color: ${(props) => props.theme.color.lightBorder};
@@ -113,6 +118,13 @@ const StyledForm = styled("form")`
     color: ${(props) => props.theme.color.label};
     margin-top: 10px;
     margin-left: ${(props) => props.theme.margin.default};
+
+    .required {
+      transform: translateY(-0.5em);
+      position: absolute;
+      font-size: 0.7em;
+      padding-left: 0.5em;
+    }
   }
 
   @keyframes fadeIn {

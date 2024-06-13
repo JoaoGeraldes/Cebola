@@ -124,7 +124,6 @@ function App() {
     );
   }
 
-  console.log("user", user);
   return (
     <UserContext.Provider value={user}>
       <MessageContext.Provider value={{ message, setMessage }}>
@@ -137,13 +136,18 @@ function App() {
                 : null
             }
           />
-          {!user && (
-            <h1>
-              User is not set. Even though you are logged in, you can't add
-              entries. Fix me! -{" "}
-              <button onClick={() => setIsAuthenticated(false)}>Logout</button>
-            </h1>
-          )}
+
+          <h1>{JSON.stringify(user)}</h1>
+          {!user.username ||
+            (!user.password && (
+              <h1>
+                User is not set. Even though you are logged in, you can't add
+                entries. Fix me! -{" "}
+                <button onClick={() => setIsAuthenticated(false)}>
+                  Logout
+                </button>
+              </h1>
+            ))}
           <StyledApp className="App">
             {isAuthenticated && (
               <div className="top-menu">
@@ -169,7 +173,26 @@ function App() {
                       loadEntries(entry.nextEntryId);
                     }}
                     onSaveEdit={async (editedData) => {
-                      await CebolaClient.updateEntry(entry.id, editedData);
+                      if (!user) return;
+
+                      const data = editedData as Entry;
+
+                      const encrypted = await CebolaClient.encrypt(
+                        data.password,
+                        `${user?.username}+${user?.password}`
+                      );
+
+                      const dataWithEncryptedPassword: NewEntry = {
+                        ...data,
+                        password: encrypted.cipherText,
+                        iv: encrypted.ivText,
+                      };
+
+                      await CebolaClient.updateEntry(
+                        entry.id,
+                        dataWithEncryptedPassword
+                      );
+
                       loadEntries(cursor);
                     }}
                   />
