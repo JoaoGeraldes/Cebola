@@ -137,7 +137,6 @@ function App() {
             }
           />
 
-          <h1>{JSON.stringify(user)}</h1>
           {!user.username ||
             (!user.password && (
               <h1>
@@ -173,8 +172,8 @@ function App() {
                       loadEntries(entry.nextEntryId);
                     }}
                     onSaveEdit={async (editedData) => {
-                      if (!user) return;
-
+                      if (!user.username || !user.password) return;
+                      console.log("FDS")
                       const data = editedData as Entry;
 
                       const encrypted = await CebolaClient.encrypt(

@@ -1,0 +1,1 @@
+- Crypto module requires [Secure contexts](https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts) hence not working while in development, and tunneling to mobile but it works on _localhost_. Localhost, by MDN, is considered a _secure context_.

@@ -49,7 +49,7 @@ export default function EntryCard(props: Props) {
 
     const handleAsyncDecrypt = async () => {
       try {
-        if (entry.password && entry.iv && user.username && user.password) {
+        if (entry && entry.iv && user.username && user.password) {
           const decrypted = await CebolaClient.decrypt(
             entry.password,
             entry.iv,
@@ -64,7 +64,7 @@ export default function EntryCard(props: Props) {
     };
 
     handleAsyncDecrypt();
-  }, [entry.id, user.username, user.password]);
+  }, [entry, user]);
 
   function handleDelete() {
     onDelete();
@@ -78,6 +78,10 @@ export default function EntryCard(props: Props) {
     }
 
     if (entryInputsData) {
+      if (!entryInputsData.password || !entryInputsData.description) {
+        setMessage("[description] and [password] fields are required.");
+        return;
+      }
       onSaveEdit(entryInputsData);
     }
   }
@@ -123,13 +127,6 @@ export default function EntryCard(props: Props) {
   return (
     <StyledEntry key={entry.id}>
       <div className="card">
-        <small>
-          {JSON.stringify({
-            entry: entry.password,
-            username: user.username,
-            password: user.password,
-          })}
-        </small>
         {DateSection}
 
         {isEditing ? (
@@ -184,6 +181,7 @@ const DisplayEditForm = (props: {
     <form>
       <label htmlFor="description">description</label>
       <Input
+        required
         onChange={handleInputChange}
         id="description"
         type="text"
@@ -192,6 +190,7 @@ const DisplayEditForm = (props: {
 
       <label htmlFor="password">password</label>
       <Input
+        required
         onChange={handleInputChange}
         id="password"
         type="text"
