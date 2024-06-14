@@ -79,9 +79,11 @@ function App() {
 
   async function loadEntries(_cursor?: string | null) {
     const result = await CebolaClient.getEntries({
-      cursor: _cursor === null ? _cursor : cursor,
+      cursor: _cursor as string,
       length: 3,
     });
+
+    console.log("Starting on cursor: ", _cursor);
 
     if (!result) return;
 
@@ -173,7 +175,6 @@ function App() {
                     }}
                     onSaveEdit={async (editedData) => {
                       if (!user.username || !user.password) return;
-                      console.log("FDS")
                       const data = editedData as Entry;
 
                       const encrypted = await CebolaClient.encrypt(
@@ -182,6 +183,7 @@ function App() {
                       );
 
                       const dataWithEncryptedPassword: NewEntry = {
+                        ...entry,
                         ...data,
                         password: encrypted.cipherText,
                         iv: encrypted.ivText,
@@ -192,7 +194,7 @@ function App() {
                         dataWithEncryptedPassword
                       );
 
-                      loadEntries(cursor);
+                      loadEntries(entries[0].id);
                     }}
                   />
                 </Fragment>

@@ -55,7 +55,11 @@ export default function EntryCard(props: Props) {
             entry.iv,
             `${user.username}+${user.password}`
           );
-
+          setEntryInputsData({
+            ...entryInputsData,
+            ...entry,
+            password: decrypted,
+          });
           setDecryptedPassword(decrypted);
         }
       } catch {
@@ -90,6 +94,7 @@ export default function EntryCard(props: Props) {
     const id = e.target.id;
     const value = e.target.value;
     const inputsData = { ...entryInputsData } as Partial<UpdateEntry>;
+
     setEntryInputsData({ ...inputsData, [id]: value });
   }
 
@@ -111,8 +116,9 @@ export default function EntryCard(props: Props) {
   const DateSection = (
     <div className="date" onClick={() => setIsExpanded(!isExpanded)}>
       <small>
-        {/*   {formattedDate.time}  */}
         {formattedDate.date}
+        &nbsp;&nbsp;
+        {formattedDate.time}
       </small>
       <div
         style={{
@@ -332,7 +338,7 @@ const StyledEntry = styled("div")`
     text-shadow: 1px 1px #25301e;
     align-items: center;
     cursor: pointer;
-    padding: ${(props) => props.theme.padding.default};
+    font-size: 0.8em;
   }
 
   .actions {
