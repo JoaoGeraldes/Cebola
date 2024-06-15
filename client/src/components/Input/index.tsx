@@ -17,11 +17,12 @@ const StyledInput = styled("input")<Props>`
   border-bottom: 1px solid ${(props) => props.theme.color.lightBorder};
   border-right: 1px solid ${(props) => props.theme.color.lightBorder};
   color: ${(props) => props.theme.color.fg};
-  padding: ${(props) => props.theme.padding.lil};
+  padding: 8px 3px;
   opacity: 0.5;
   transition: opacity 0.4s;
   margin-top: 5px;
   margin-bottom: 5px;
+  font-size: 1.2em;
 
   &:focus-visible {
     outline: 2px solid ${(props) => props.theme.color.greeen};

@@ -14,18 +14,22 @@ export const theme = {
   },
 
   margin: {
-    default: "5px",
-    double: "10px",
+    default: "6px",
+    double: "12px",
   },
 
   padding: {
-    default: "8px",
+    default: "10px",
     lil: "4px",
     box: "16px",
   },
 
+  textShadow: {
+    subtle: "1px 1px 1px #00000066",
+  },
+
   boxShadow: {
-    subtle: "0px 1px 1px #00000085",
+    subtle: "0px 1px 1px #00000059",
   },
 };
 

@@ -13,6 +13,7 @@ import { CebolaClient } from "../../CebolaClient";
 import { MessageContext, UserContext } from "../../App";
 import Horus from "../Icons/Horus";
 import Clipboard from "../Icons/Clipboard";
+import Label from "../Label";
 
 interface Props {
   entry: Entry;
@@ -185,7 +186,7 @@ const DisplayEditForm = (props: {
 
   return (
     <form>
-      <label htmlFor="description">description</label>
+      <Label htmlFor="description">description</Label>
       <Input
         required
         onChange={handleInputChange}
@@ -194,7 +195,7 @@ const DisplayEditForm = (props: {
         value={entryInputsData?.description ?? entry.description}
       />
 
-      <label htmlFor="password">password</label>
+      <Label htmlFor="password">password</Label>
       <Input
         required
         onChange={handleInputChange}
@@ -203,7 +204,7 @@ const DisplayEditForm = (props: {
         value={entryInputsData?.password ?? (decryptedPassword || "")}
       />
 
-      <label htmlFor="domain">domain</label>
+      <Label htmlFor="domain">domain</Label>
       <Input
         onChange={handleInputChange}
         id="domain"
@@ -211,7 +212,7 @@ const DisplayEditForm = (props: {
         value={entryInputsData?.domain ?? entry.domain}
       />
 
-      <label htmlFor="username">username</label>
+      <Label htmlFor="username">username</Label>
       <Input
         onChange={handleInputChange}
         id="username"
@@ -261,10 +262,10 @@ const DisplayEntry = (props: {
 
   return isExpanded ? (
     <>
-      <label htmlFor="description">description</label>
+      <Label htmlFor="description">description</Label>
       <span id="description">{entry.description}</span>
 
-      <label htmlFor="password">password</label>
+      <Label htmlFor="password">password</Label>
       <div className="password-container">
         <span id="password" style={{ filter: reveal ? "unset" : "blur(3px)" }}>
           {(reveal && decryptedPassword) || entry.password}
@@ -280,10 +281,10 @@ const DisplayEntry = (props: {
         </div>
       </div>
 
-      {entry?.domain && <label htmlFor="domain">domain</label>}
+      {entry?.domain && <Label htmlFor="domain">domain</Label>}
       <span id="domain">{entry.domain}</span>
 
-      {entry?.username && <label htmlFor="username">username</label>}
+      {entry?.username && <Label htmlFor="username">username</Label>}
       <span id="username">{entry.username}</span>
 
       <div className="actions">
@@ -300,7 +301,7 @@ const DisplayEntry = (props: {
     </>
   ) : (
     <>
-      <label htmlFor="description">description</label>
+      <Label htmlFor="description">description</Label>
       <span id="description">{entry.description}</span>
     </>
   );
@@ -334,8 +335,8 @@ const StyledEntry = styled("div")`
     display: flex;
     width: 100%;
     justify-content: space-between;
-    color: #9a9e97;
-    text-shadow: 1px 1px #25301e;
+    color: ${(props) => props.theme.color.label};
+    text-shadow: ${(props) => props.theme.textShadow.subtle};
     align-items: center;
     cursor: pointer;
     font-size: 0.8em;
@@ -361,17 +362,16 @@ const StyledEntry = styled("div")`
 
     span {
       color: ${(props) => props.theme.color.fg};
-      text-shadow: 1px 1px #000000;
+      text-shadow: ${(props) => props.theme.textShadow.subtle};
       max-width: 57%;
     }
 
-    label {
+    /* label {
       color: #8ca878;
-      text-shadow: 1px 1px #25301e;
+      text-shadow: ${(props) => props.theme.textShadow.subtle};
       font-variant: all-petite-caps;
       font-size: 0.8em;
       margin-top: 5px;
-      left: 0;
-    }
+    } */
   }
 `;

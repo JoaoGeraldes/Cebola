@@ -6,5 +6,12 @@
 
 - a token is set to be valid for 1h. Though, if the username+password which are used for decrypt passwords are not set we can't unlock the passwords. Find a way to improve UX on these cases. Example: A user might be logged in (token is still valid) but the username and password are not set in the frontend. Happens for instance, when we refresh the page.
 
+- improve the logo. Redesign to a high quality SVG.
 
+- make sure the first request (login) sends the payload already encrypted.
 
+- improve pagination behavior on the client side.
+
+- trim the other input fields. Currently, only the password is being trimmed (remove whitespace from both ends of the strings)
+
+- create component for modal logic. Separate the _cebola guy_ from the main modal being used in the `<App />`

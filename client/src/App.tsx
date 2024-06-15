@@ -83,8 +83,6 @@ function App() {
       length: 3,
     });
 
-    console.log("Starting on cursor: ", _cursor);
-
     if (!result) return;
 
     setEntries(result);
@@ -177,8 +175,10 @@ function App() {
                       if (!user.username || !user.password) return;
                       const data = editedData as Entry;
 
+                      const trimmmedPassword = data?.password?.trim();
+
                       const encrypted = await CebolaClient.encrypt(
-                        data.password,
+                        trimmmedPassword,
                         `${user?.username}+${user?.password}`
                       );
 
@@ -210,13 +210,15 @@ function App() {
 
           {openNewEntryModal && (
             <StyledModal>
+              <img className="cebola-guy" src="cebola_logo.png" alt="" />
               <EntryForm
                 onSubmit={async (formData) => {
                   if (!user) return;
 
-                  console.log("Will encrypt: ", formData.password);
+                  const trimmmedPassword = formData?.password?.trim();
+
                   const encrypted = await CebolaClient.encrypt(
-                    formData.password,
+                    trimmmedPassword,
                     `${user?.username}+${user?.password}`
                   );
 
@@ -244,6 +246,7 @@ export default App;
 
 const StyledModal = styled("div")`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -253,11 +256,36 @@ const StyledModal = styled("div")`
   padding: ${(props) => props.theme.padding.default};
   top: 0;
   background: ${(props) => props.theme.color.daGreen};
+
+  .cebola-guy {
+    transform: translateY(40%);
+    animation: sneaky 0.4s;
+    animation-delay: 0.3s;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-out;
+    z-index: -1;
+    opacity: 0;
+
+    @keyframes sneaky {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+        rotate: 12deg;
+      }
+      
+      to {
+        transform: translateY(40%);
+        opacity: 1;
+        rotate: 0deg;
+      }
+    }
+  }
 `;
 
 const StyledApp = styled("div")`
   background: ${(props) => props.theme.bg};
   padding: ${(props) => props.theme.padding.default};
+
   .top-menu {
     display: flex;
     justify-content: space-between;
