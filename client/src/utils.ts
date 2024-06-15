@@ -9,3 +9,15 @@ export function objectToQueryString(object: Record<string, unknown>) {
     return "?f";
   }
 }
+
+export async function copyToClipboard(
+  text: string,
+  onSuccess: () => void,
+  onFailure: () => void
+) {
+  try {
+    onSuccess();
+  } catch {
+    onFailure();
+  }
+}

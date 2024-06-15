@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { CebolaClient } from "../../CebolaClient";
 import Button from "../Button";
 import Input from "../Input";
 import styled from "styled-components";
@@ -44,8 +43,8 @@ export default function Login(props: Props) {
           }
         />
 
-        <br/>
-        <br/>
+        <br />
+        <br />
         <Button type="submit">Login</Button>
       </form>
     </StyledLogin>

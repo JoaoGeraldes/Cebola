@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import styled from "styled-components";
 import { MessageContext } from "../../App";
 
@@ -26,34 +26,23 @@ export default function Message(props: Props) {
         }}
       >
         <small>{message}</small>
-        {/* <Button
-          onClick={() => {
-            if (onDismiss) {
-              onDismiss();
-            }
-
-            setMessage(null);
-          }}
-        >
-          ok
-        </Button> */}
       </div>
     </MessageWrapper>
   );
 }
 
 const MessageWrapper = styled("div")`
+  box-shadow: ${(props) => props.theme.boxShadow.subtle};
   display: flex;
   align-items: center;
   flex-direction: row;
   justify-content: center;
   width: 100%;
   cursor: pointer;
-  box-shadow: ${(props) => props.theme.boxShadow.subtle};
 
   .message {
+    background: ${(props) => props.theme.color.yellow};
     display: flex;
-    background: #c3b44f;
     padding: 8px;
     width: 100%;
     text-align: center;

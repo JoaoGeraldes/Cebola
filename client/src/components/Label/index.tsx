@@ -14,11 +14,4 @@ const StyledLabel = styled.label`
   color: ${(props) => props.theme.color.label};
   margin-top: 10px;
   font-variant: small-caps;
-
-  /* .required {
-      transform: translateY(-0.5em);
-      position: absolute;
-      font-size: 0.7em;
-      padding-left: 0.5em;
-    } */
 `;

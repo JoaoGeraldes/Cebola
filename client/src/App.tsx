@@ -1,17 +1,16 @@
 import React, { Fragment, createContext, useEffect, useState } from "react";
-import "./App.css";
 import { Entry, NewEntry, User } from "../../types";
-import EntryCard from "./components/Entry";
+import EntryCard from "./components/EntryExpandable";
 import EntryForm from "./components/EntryForm";
 import styled, { ThemeProvider } from "styled-components";
 import Button from "./components/Button";
 import { theme } from "./theme";
 import { CebolaClient } from "./CebolaClient";
-import Plus from "./components/Icons/Plus";
 import RightArrow from "./components/Icons/RightArrow";
 import Login from "./components/Login";
-import Download from "./components/Icons/Download";
 import Message from "./components/Message";
+import Modal from "./components/Modal";
+import TopMenu from "./components/TopMenu.tsx";
 
 export const UserContext = createContext<User>({
   username: null,
@@ -107,7 +106,7 @@ function App() {
   if (!isAuthenticated) {
     return (
       <ThemeProvider theme={theme}>
-        <StyledModal>
+        <Modal>
           <Login
             onSubmit={async (inputData) => {
               const respo = await CebolaClient.login(inputData);
@@ -119,7 +118,7 @@ function App() {
               }
             }}
           />
-        </StyledModal>
+        </Modal>
       </ThemeProvider>
     );
   }
@@ -128,6 +127,9 @@ function App() {
     <UserContext.Provider value={user}>
       <MessageContext.Provider value={{ message, setMessage }}>
         <ThemeProvider theme={theme}>
+          {/* ---------------------------  */}
+          {/* -------- MESSENGER --------  */}
+          {/* ---------------------------  */}
           <Message
             message={message}
             onDismiss={
@@ -136,32 +138,17 @@ function App() {
                 : null
             }
           />
-
-          {!user.username ||
-            (!user.password && (
-              <h1>
-                User is not set. Even though you are logged in, you can't add
-                entries. Fix me! -{" "}
-                <button onClick={() => setIsAuthenticated(false)}>
-                  Logout
-                </button>
-              </h1>
-            ))}
           <StyledApp className="App">
+            {/* --------------------------  */}
+            {/* -------- TOP MENU --------  */}
+            {/* --------------------------  */}
             {isAuthenticated && (
-              <div className="top-menu">
-                <Button onClick={() => CebolaClient.getBackup()}>
-                  <Download fill={theme.color.yellow} />
-                  &nbsp;Download
-                </Button>
-
-                <Button onClick={() => setOpenNewEntryModal(true)}>
-                  <Plus fill={theme.color.yellow} />
-                  &nbsp;New entry
-                </Button>
-              </div>
+              <TopMenu setOpenNewEntryModal={setOpenNewEntryModal} />
             )}
 
+            {/* -------------------------  */}
+            {/* -------- ENTRIES --------  */}
+            {/* -------------------------  */}
             {hasEntries &&
               entries.map((entry) => (
                 <Fragment key={entry.id}>
@@ -200,6 +187,9 @@ function App() {
                 </Fragment>
               ))}
 
+            {/* ----------------------------  */}
+            {/* -------- PAGINATION --------  */}
+            {/* ----------------------------  */}
             {hasEntries && (
               <Button onClick={() => loadEntries(cursor)}>
                 <RightArrow fill={theme.color.yellow} />
@@ -208,8 +198,11 @@ function App() {
             )}
           </StyledApp>
 
+          {/* -----------------------  */}
+          {/* -------- MODAL --------  */}
+          {/* -----------------------  */}
           {openNewEntryModal && (
-            <StyledModal>
+            <Modal>
               <img className="cebola-guy" src="cebola_logo.png" alt="" />
               <EntryForm
                 onSubmit={async (formData) => {
@@ -234,7 +227,7 @@ function App() {
                 }}
                 onCancel={() => setOpenNewEntryModal(false)}
               />
-            </StyledModal>
+            </Modal>
           )}
         </ThemeProvider>
       </MessageContext.Provider>
@@ -244,47 +237,14 @@ function App() {
 
 export default App;
 
-const StyledModal = styled("div")`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  z-index: 100;
-  position: absolute;
-  padding: ${(props) => props.theme.padding.default};
-  top: 0;
-  background: ${(props) => props.theme.color.daGreen};
-
-  .cebola-guy {
-    transform: translateY(40%);
-    animation: sneaky 0.4s;
-    animation-delay: 0.3s;
-    animation-fill-mode: forwards;
-    animation-timing-function: ease-out;
-    z-index: -1;
-    opacity: 0;
-
-    @keyframes sneaky {
-      from {
-        transform: translateY(100%);
-        opacity: 0;
-        rotate: 12deg;
-      }
-      
-      to {
-        transform: translateY(40%);
-        opacity: 1;
-        rotate: 0deg;
-      }
-    }
-  }
-`;
-
 const StyledApp = styled("div")`
   background: ${(props) => props.theme.bg};
   padding: ${(props) => props.theme.padding.default};
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 700px;
 
   .top-menu {
     display: flex;

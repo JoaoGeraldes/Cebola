@@ -10,13 +10,13 @@ export default function Input(props: Props) {
 }
 
 const StyledInput = styled("input")<Props>`
+  background: ${({ theme }) => theme.color.darkBg};
+  border-top: 1px solid ${({ theme }) => theme.color.darkBorder};
+  border-left: 1px solid ${({ theme }) => theme.color.darkBorder};
+  border-bottom: 1px solid ${({ theme }) => theme.color.lightBorder};
+  border-right: 1px solid ${({ theme }) => theme.color.lightBorder};
+  color: ${({ theme }) => theme.color.fg};
   width: 100%;
-  background: ${(props) => props.theme.color.darkBg};
-  border-top: 1px solid ${(props) => props.theme.color.darkBorder};
-  border-left: 1px solid ${(props) => props.theme.color.darkBorder};
-  border-bottom: 1px solid ${(props) => props.theme.color.lightBorder};
-  border-right: 1px solid ${(props) => props.theme.color.lightBorder};
-  color: ${(props) => props.theme.color.fg};
   padding: 8px 3px;
   opacity: 0.5;
   transition: opacity 0.4s;
@@ -25,7 +25,7 @@ const StyledInput = styled("input")<Props>`
   font-size: 1.2em;
 
   &:focus-visible {
-    outline: 2px solid ${(props) => props.theme.color.greeen};
+    outline: 2px solid ${({ theme }) => theme.color.greeen};
     outline-style: dashed;
   }
 
