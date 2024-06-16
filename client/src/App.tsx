@@ -5,7 +5,7 @@ import EntryForm from "./components/EntryForm";
 import styled, { ThemeProvider } from "styled-components";
 import Button from "./components/Button";
 import { theme } from "./theme";
-import { CebolaClient } from "./CebolaClient";
+import { CebolaClient } from "./models/CebolaClient";
 import RightArrow from "./components/Icons/RightArrow";
 import Login from "./components/Login";
 import Message from "./components/Message";

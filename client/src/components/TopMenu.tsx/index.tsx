@@ -1,4 +1,4 @@
-import { CebolaClient } from "../../CebolaClient";
+import { CebolaClient } from "../../models/CebolaClient";
 import { theme } from "../../theme";
 import Button from "../Button";
 import Download from "../Icons/Download";

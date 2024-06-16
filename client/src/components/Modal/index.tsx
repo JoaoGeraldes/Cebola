@@ -19,7 +19,7 @@ const StyledModal = styled("div")`
   position: absolute;
   padding: ${(props) => props.theme.padding.default};
   top: 0;
-  background: ${(props) => props.theme.color.daGreen};
+  background: ${(props) => props.theme.background.green4};
 
   .cebola-guy {
     transform: translateY(40%);

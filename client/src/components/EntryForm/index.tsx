@@ -42,7 +42,7 @@ export default function EntryForm(props: Props) {
     <StyledForm onSubmit={handleSubmit}>
       <div className="limiter">
         <h1>
-          <Plus fill={theme.color.lightBorder} /> Add new entry
+          <Plus fill={theme.color.dullGreen} /> Add new entry
         </h1>
         <span className="hint">
           <span className="required">{requiredIcon}</span> -{" "}
@@ -91,16 +91,16 @@ const StyledForm = styled("form")`
   width: 100%;
   max-width: 700px;
   animation: fadeIn 0.3s;
-  background: ${(props) => props.theme.color.bg};
+  background: ${(props) => props.theme.background.green1};
   padding: ${(props) => props.theme.padding.box};
 
   h1 {
-    color: ${(props) => props.theme.color.lightBorder};
+    color: ${(props) => props.theme.color.white};
   }
 
   .hint {
     text-align: right;
-    color: ${(props) => props.theme.color.fg};
+    color: ${(props) => props.theme.color.white};
   }
 
   .required {

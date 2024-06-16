@@ -1,16 +1,24 @@
 export const theme = {
   color: {
-    fg: "#ffffff",
-    bg: "#4c5844",
-    darkBg: "#3e4637",
-    darkerBg: "#485440",
-    daGreen: "#31372d",
-    lightBorder: "#64735b",
-    darkBorder: "#30372a",
+    white: "#ffffff",
     yellow: "#c3b44f",
-    greeen: "#66ff00",
-    label: "#a2b298",
-    bafgreen: "#baff76",
+    intenseGreen: "#66ff00",
+    dullGreen: "#a2b298",
+    memeGreen: "#baff76",
+  },
+
+  borderColor: {
+    green1: "#64735b",
+    green2: "#30372a",
+  },
+
+  background: {
+    green1: "#4c5844",
+    green2: "#3e4637",
+    green3: "#485440",
+    green4: "#31372d",
+    green5: "#64735b",
+    green6: "#30372a",
   },
 
   margin: {

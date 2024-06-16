@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { Entry, UpdateEntry } from "../../../../types";
 import { MessageContext, UserContext } from "../../App";
-import { CebolaClient } from "../../CebolaClient";
+import { CebolaClient } from "../../models/CebolaClient";
 import { theme } from "../../theme";
 import { copyToClipboard } from "../../utils";
 import Button from "../Button";

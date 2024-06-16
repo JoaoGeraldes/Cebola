@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Entry, UpdateEntry } from "../../../../types";
 import { useContext, useEffect, useState } from "react";
 import ChevronUp from "../Icons/ChevronUp";
-import { CebolaClient } from "../../CebolaClient";
+import { CebolaClient } from "../../models/CebolaClient";
 import { MessageContext, UserContext } from "../../App";
 import EditForm from "./EditForm";
 import Fields from "./Fields";
@@ -166,7 +166,7 @@ const StyledEntry = styled("div")`
     display: flex;
     width: 100%;
     justify-content: space-between;
-    color: ${(props) => props.theme.color.label};
+    color: ${(props) => props.theme.color.dullGreen};
     text-shadow: ${(props) => props.theme.textShadow.subtle};
     align-items: center;
     cursor: pointer;
@@ -186,27 +186,19 @@ const StyledEntry = styled("div")`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    background: ${(props) => props.theme.color.darkerBg};
+    background: ${(props) => props.theme.background.green3};
     padding: ${(props) => props.theme.padding.default};
     box-shadow: ${(props) => props.theme.boxShadow.subtle};
     position: relative;
 
     span {
-      color: ${(props) => props.theme.color.fg};
+      color: ${(props) => props.theme.color.white};
       text-shadow: ${(props) => props.theme.textShadow.subtle};
       max-width: 57%;
     }
-
-    /* label {
-      color: #8ca878;
-      text-shadow: ${(props) => props.theme.textShadow.subtle};
-      font-variant: all-petite-caps;
-      font-size: 0.8em;
-      margin-top: 5px;
-    } */
   }
 
   #password {
-    color: ${(props) => props.theme.color.bafgreen};
+    color: ${(props) => props.theme.color.memeGreen};
   }
 `;

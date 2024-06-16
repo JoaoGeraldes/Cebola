@@ -10,34 +10,33 @@ export default function Button(props: Props) {
 }
 
 const StyledButton = styled("button")<Props>`
+  background: ${(props) => props.theme.background.green1};
+  border-top: 1px solid ${(props) => props.theme.borderColor.green1};
+  border-left: 1px solid ${(props) => props.theme.borderColor.green1};
+  border-bottom: 1px solid ${(props) => props.theme.borderColor.green2};
+  border-right: 1px solid ${(props) => props.theme.borderColor.green2};
+  color: ${(props) => props.theme.color.yellow};
   letter-spacing: 1px;
   font-variant: petite-caps;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${(props) => props.theme.color.bg};
-  border-top: 1px solid ${(props) => props.theme.color.lightBorder};
-  border-left: 1px solid ${(props) => props.theme.color.lightBorder};
-  border-bottom: 1px solid ${(props) => props.theme.color.darkBorder};
-  border-right: 1px solid ${(props) => props.theme.color.darkBorder};
-  color: ${(props) => props.theme.color.yellow};
   cursor: pointer;
   padding: 0.4em 0.6em;
   height: 36px;
-  /* margin: ${(props) => props.theme.margin.default}; */
 
   &:hover {
     color: ${(props) => props.theme.color.yellow};
     transition: background 0.25s;
-    background: ${(props) => props.theme.color.darkBg};
+    background: ${(props) => props.theme.background.green2};
   }
 
   &:active {
-    border-top: 1px solid ${(props) => props.theme.color.darkBorder};
+    border-top: 1px solid ${(props) => props.theme.borderColor.green2};
     border-left: unset;
-    border-bottom: 1px solid ${(props) => props.theme.color.lightBorder};
+    border-bottom: 1px solid ${(props) => props.theme.borderColor.green1};
     border-right: unset;
-    background: ${(props) => props.theme.color.bg};
+    background: ${(props) => props.theme.background.green1};
   }
 
   &:focus-visible {
