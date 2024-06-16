@@ -84,6 +84,8 @@ export default function EntryForm(props: Props) {
 }
 
 const StyledForm = styled("form")`
+  background: ${(props) => props.theme.background.green1};
+  padding: ${(props) => props.theme.padding.box};
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -91,16 +93,14 @@ const StyledForm = styled("form")`
   width: 100%;
   max-width: 700px;
   animation: fadeIn 0.3s;
-  background: ${(props) => props.theme.background.green1};
-  padding: ${(props) => props.theme.padding.box};
 
   h1 {
     color: ${(props) => props.theme.color.white};
   }
 
   .hint {
-    text-align: right;
     color: ${(props) => props.theme.color.white};
+    text-align: right;
   }
 
   .required {

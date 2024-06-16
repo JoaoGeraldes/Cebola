@@ -1,4 +1,4 @@
-import React, { Fragment, createContext, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Entry, NewEntry, User } from "../../types";
 import EntryCard from "./components/EntryExpandable";
 import EntryForm from "./components/EntryForm";
@@ -11,18 +11,8 @@ import Login from "./components/Login";
 import Message from "./components/Message";
 import Modal from "./components/Modal";
 import TopMenu from "./components/TopMenu.tsx";
-
-export const UserContext = createContext<User>({
-  username: null,
-  password: null,
-});
-export const MessageContext = createContext<{
-  message: string | null;
-  setMessage: React.Dispatch<React.SetStateAction<string | null>>;
-}>({
-  message: null,
-  setMessage: () => null,
-});
+import { UserContext } from "./contexts/UserContext";
+import { MessageContext } from "./contexts/MessageContext";
 
 function App() {
   const [entries, setEntries] = useState<Entry[] | null>(null);

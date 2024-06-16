@@ -10,8 +10,8 @@ export default function Label(
 }
 
 const StyledLabel = styled.label`
-  text-align: left;
   color: ${(props) => props.theme.color.dullGreen};
+  text-align: left;
   margin-top: 10px;
   font-variant: small-caps;
 `;

@@ -9,6 +9,8 @@ export default function Modal({ children }: Props) {
 }
 
 const StyledModal = styled("div")`
+  background: ${(props) => props.theme.background.green4};
+  padding: ${(props) => props.theme.padding.default};
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,9 +19,7 @@ const StyledModal = styled("div")`
   height: 100%;
   z-index: 100;
   position: absolute;
-  padding: ${(props) => props.theme.padding.default};
   top: 0;
-  background: ${(props) => props.theme.background.green4};
 
   .cebola-guy {
     transform: translateY(40%);

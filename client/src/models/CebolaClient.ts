@@ -28,7 +28,7 @@ export class CebolaClient extends CebolaCrypto {
       });
 
       const json = await response.json();
-      return response;
+      return json;
     } catch {
       return null;
     }

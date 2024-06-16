@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import styled from "styled-components";
-import { MessageContext } from "../../App";
+import { MessageContext } from "../../contexts/MessageContext";
 
 interface Props {
   message?: string | null;

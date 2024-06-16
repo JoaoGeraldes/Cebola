@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { Entry, UpdateEntry } from "../../../../types";
-import { MessageContext, UserContext } from "../../App";
 import { CebolaClient } from "../../models/CebolaClient";
 import { theme } from "../../theme";
 import { copyToClipboard } from "../../utils";
@@ -10,6 +9,8 @@ import Clipboard from "../Icons/Clipboard";
 import Horus from "../Icons/Horus";
 import Pencil from "../Icons/Pencil";
 import Label from "../Label";
+import { UserContext } from "../../contexts/UserContext";
+import { MessageContext } from "../../contexts/MessageContext";
 
 interface Props {
   reveal: boolean;
@@ -72,7 +73,7 @@ const Expanded = (props: ExpandedProps) => {
     handleDelete,
     setIsEditing,
   } = props;
-  
+
   const user = useContext(UserContext);
   const { setMessage } = useContext(MessageContext);
 
@@ -83,8 +84,12 @@ const Expanded = (props: ExpandedProps) => {
 
       <Label htmlFor="password">password</Label>
       <div className="password-container">
-        <span id="password" style={{ filter: reveal ? "unset" : "blur(3px)" }}>
-          {(reveal && decryptedPassword) || entry.password}
+        <span id="password" style={{ filter: reveal ? "unset" : "blur(2px)" }}>
+          {(reveal && decryptedPassword) || (
+            <small>
+              &#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;
+            </small>
+          )}
         </span>
 
         <div className="password-actions">

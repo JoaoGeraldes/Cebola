@@ -3,9 +3,10 @@ import { Entry, UpdateEntry } from "../../../../types";
 import { useContext, useEffect, useState } from "react";
 import ChevronUp from "../Icons/ChevronUp";
 import { CebolaClient } from "../../models/CebolaClient";
-import { MessageContext, UserContext } from "../../App";
 import EditForm from "./EditForm";
 import Fields from "./Fields";
+import { UserContext } from "../../contexts/UserContext";
+import { MessageContext } from "../../contexts/MessageContext";
 
 interface Props {
   entry: Entry;
