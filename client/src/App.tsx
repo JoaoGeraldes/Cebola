@@ -120,14 +120,17 @@ function App() {
           {/* ---------------------------  */}
           {/* -------- MESSENGER --------  */}
           {/* ---------------------------  */}
-          <Message
-            message={message}
-            onDismiss={
-              !user.username || !user.password
-                ? () => setIsAuthenticated(false)
-                : null
-            }
-          />
+          {message && (
+            <Message
+              message={message}
+              onDismiss={
+                !user.username || !user.password
+                  ? () => setIsAuthenticated(false)
+                  : null
+              }
+            />
+          )}
+
           <StyledApp className="App">
             {/* --------------------------  */}
             {/* -------- TOP MENU --------  */}

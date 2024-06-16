@@ -1,6 +1,7 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { MessageContext } from "../../contexts/MessageContext";
+import { minutesPassedSince, secondsPassedSince } from "../../utils";
 
 interface Props {
   message?: string | null;
@@ -8,8 +9,34 @@ interface Props {
 }
 export default function Message(props: Props) {
   const { message, onDismiss } = props;
-
+  const [messageDate, setMessageDate] = useState("Just now");
   const { setMessage } = useContext(MessageContext);
+
+  useEffect(() => {
+    const now = Date.now();
+
+    let interval = setInterval(() => {
+      const secondsPassed = secondsPassedSince(now);
+      const minutesPassed = minutesPassedSince(secondsPassed);
+
+      if (secondsPassed < 10) {
+        console.log("Just now");
+        setMessageDate("Just now");
+      }
+
+      if (secondsPassed > 10 && secondsPassed < 60) {
+        console.log(`${secondsPassed} seconds ago`);
+        setMessageDate(`${secondsPassed} seconds ago`);
+      }
+
+      if (secondsPassed >= 60) {
+        console.log(`${minutesPassed} minute(s) ago`);
+        setMessageDate(`${minutesPassed} minutes ago`);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   if (!message) return null;
 
@@ -25,7 +52,8 @@ export default function Message(props: Props) {
           setMessage(null);
         }}
       >
-        <small>{message}</small>
+        <b>{message}</b>
+        <small>{messageDate}</small>
       </div>
     </MessageWrapper>
   );

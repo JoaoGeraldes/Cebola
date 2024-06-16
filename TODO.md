@@ -15,3 +15,5 @@
 - trim the other input fields. Currently, only the password is being trimmed (remove whitespace from both ends of the strings)
 
 - create component for modal logic. Separate the _cebola guy_ from the main modal being used in the `<App />`
+
+- fix message countdown whenever another message is the same as previous (ie: copy to clipboard), it's not updating the countdown on a new message pops (assuming the previous one was not closed)

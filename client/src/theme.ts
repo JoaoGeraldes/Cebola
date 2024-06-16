@@ -15,10 +15,8 @@ export const theme = {
   background: {
     green1: "#4c5844",
     green2: "#3e4637",
-    green3: "#485440",
     green4: "#31372d",
     green5: "#64735b",
-    green6: "#30372a",
   },
 
   margin: {

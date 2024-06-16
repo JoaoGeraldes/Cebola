@@ -21,3 +21,23 @@ export async function copyToClipboard(
     onFailure();
   }
 }
+
+export function secondsPassedSince(timestamp: number) {
+  // Get the current time
+  const now = Date.now();
+
+  // Calculate the difference in milliseconds
+  const elapsedMilliseconds = now - timestamp;
+
+  // Convert milliseconds to seconds
+  const elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
+
+  return elapsedSeconds;
+}
+
+export function minutesPassedSince(seconds: number) {
+  // Convert seconds to minutes
+  const minutes = Math.floor(seconds / 60);
+
+  return minutes;
+}

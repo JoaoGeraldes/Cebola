@@ -187,7 +187,7 @@ const StyledEntry = styled("div")`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    background: ${(props) => props.theme.background.green3};
+    background: ${(props) => props.theme.background.green1};
     padding: ${(props) => props.theme.padding.default};
     box-shadow: ${(props) => props.theme.boxShadow.subtle};
     position: relative;
