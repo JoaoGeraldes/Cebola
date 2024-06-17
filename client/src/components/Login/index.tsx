@@ -27,6 +27,7 @@ export default function Login(props: Props) {
       <form onSubmit={handleSubmit}>
         <Label htmlFor="username">username</Label>
         <Input
+          autoComplete="one-time-code"
           id="username"
           type="text"
           onChange={(e) =>
@@ -36,6 +37,7 @@ export default function Login(props: Props) {
 
         <Label htmlFor="password">password</Label>
         <Input
+          autoComplete="one-time-code"
           id="password"
           type="text"
           onChange={(e) =>

@@ -17,3 +17,7 @@
 - create component for modal logic. Separate the _cebola guy_ from the main modal being used in the `<App />`
 
 - fix message countdown whenever another message is the same as previous (ie: copy to clipboard), it's not updating the countdown on a new message pops (assuming the previous one was not closed)
+
+- instead of storing plain text on session storage (ie: username+password) store it in cipher text.
+
+- implement a searching feature, which searches by entry's description.

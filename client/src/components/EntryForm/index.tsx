@@ -51,6 +51,7 @@ export default function EntryForm(props: Props) {
         <Label htmlFor="description">Description {requiredIcon}</Label>
 
         <Input
+          autoComplete="one-time-code"
           required
           autoFocus
           id="description"
@@ -59,15 +60,26 @@ export default function EntryForm(props: Props) {
         />
         <Label htmlFor="password">Password {requiredIcon}</Label>
         <Input
+          autoComplete="one-time-code"
           required
           onChange={handleInputChange}
           id="password"
           type="text"
         />
         <Label htmlFor="domain">Domain</Label>
-        <Input onChange={handleInputChange} id="domain" type="text" />
+        <Input
+          autoComplete="one-time-code"
+          onChange={handleInputChange}
+          id="domain"
+          type="text"
+        />
         <Label htmlFor="Username">Username</Label>
-        <Input onChange={handleInputChange} id="username" type="text" />
+        <Input
+          autoComplete="one-time-code"
+          onChange={handleInputChange}
+          id="username"
+          type="text"
+        />
         <div className="actions">
           <Button type="button" onClick={onCancel}>
             <Return fill={theme.color.yellow} />

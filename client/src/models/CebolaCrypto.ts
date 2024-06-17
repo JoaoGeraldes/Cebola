@@ -50,7 +50,7 @@ export class CebolaCrypto {
   }
 
   // Derive a key from plain text using SHA-256
-  private static async deriveKey(plainTextPrivateKey: string) {
+  static async deriveKey(plainTextPrivateKey: string) {
     const encoder = new TextEncoder();
     const keyMaterial = encoder.encode(plainTextPrivateKey);
     const hash = await crypto.subtle.digest("SHA-256", keyMaterial);
