@@ -4,6 +4,8 @@
 
 Welcome to the **Cebola - Self Custody Password Manager**, an open-source project designed to provide a different way to manage your passwords. This project emphasizes user control, security, and simplicity. Host your server and client anywhere you want that you find suitable, and do your own adjustments that better suits your needs. I'll leave you with this boilerplate and I intend to improve it over time, with your help.
 
+![Cebola Preview](https://raw.githubusercontent.com/JoaoGeraldes/self-custody-password-manager/main/client/public/cebola-preview.gif)
+
 # 🔐 Cryptography
 
 Security is at the core of Cebola. To ensure the highest level of protection, we use a symmetric-key encryption with the [Advanced Encryption Standard (AES)](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) using [GCM](https://en.wikipedia.org/wiki/Galois/Counter_Mode) algorithm with a 256-bit key-length for encrypting password fields. The encrypted passwords are then encoded in Base64 for storage. This approach ensures that your passwords remain secure and are only accessible by you. The encryption and decryption is processed on the client-side which means that, only the client has ever access to the plaintext. All the intended encrypted data moves across the wire always in an encrypted state. Even though we could handle the encryption/decryption on the server, I though that it would be safer and more private to do it fully on the client-side. On top of this, we could (and should) always communicate (client <-> server) in a tls secure connection (https) which translates in another layer of safety (though, how wouldn't we use _https_ these days? - it's like, not even optional).
@@ -61,6 +63,7 @@ The client folder contains all the files related to the frontend of our applicat
 - Express: Uses Express to handle HTTP requests, making the server lightweight and robust.
 - Secure API: Provides endpoints for CRUD operations on entries.
 - Efficient Data Handling: Uses the doubly linked list structure to manage pagination and storage efficiently.
+- Backup: User can download the entire database in a `.zip` file.
 
 #### Folder structure (`./server`)
 
