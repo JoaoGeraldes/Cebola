@@ -4,7 +4,7 @@
 
 Welcome to the **Cebola - Self Custody Password Manager**, an open-source project designed to provide a different way to manage your passwords. This project emphasizes user control, security, and simplicity. Host your server and client anywhere you want that you find suitable, and do your own adjustments that better suits your needs. I'll leave you with this boilerplate and I intend to improve it over time, with your help.
 
-![Cebola Preview](https://raw.githubusercontent.com/JoaoGeraldes/self-custody-password-manager/main/client/public/cebola-preview.gif)
+![Cebola Preview](https://github.com/JoaoGeraldes/self-custody-password-manager/blob/main/client/public/cebola-preview.gif)
 
 # 🔐 Cryptography
 
