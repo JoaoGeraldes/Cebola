@@ -34,7 +34,7 @@ The database for this project is designed using JSON files, structured as a [dou
 
 # 🧅 Client (Frontend)
 
-    The client-side of the password manager is designed to be intuitive and user-friendly, ensuring that managing your passwords is a seamless experience. The frontend is built using modern web technologies to provide a responsive and accessible interface.
+The client-side of the password manager is designed to be intuitive and user-friendly, ensuring that managing your passwords is a seamless experience. The frontend is built using modern web technologies to provide a responsive and accessible interface.
 
 #### Some aspects
 
@@ -55,7 +55,7 @@ The client folder contains all the files related to the frontend of our applicat
 
 # 🌩️ Server (Backend)
 
-    The backend server is responsible for handling the core functionalities of the password manager, including the management of the database - file management in the system.
+The backend server is responsible for handling the core functionalities of the password manager, including the management of the database - file management in the system.
 
 #### Some aspects
 
@@ -77,7 +77,7 @@ The server folder holds the backend logic of our application. It is built with N
 
 # 💻 Installation and Setup
 
-    To get started with the Cebola - Self Custody Password Manager on your localhost...
+To get started with the Cebola - Self Custody Password Manager on your localhost...
 
 _Start the backend_
 
@@ -102,7 +102,3 @@ I welcome contributions from the community! If you have any ideas, suggestions, 
 For any questions or if you simply want to connect, find me at [LinkedIn](https://www.linkedin.com/in/joaogeraldes89/)
 
 Thank you for reading the Cebola - Self Custody Password Manager doc!
-
-```
-
-```
