@@ -20,11 +20,22 @@ Security is at the core of Cebola. To ensure the highest level of protection, we
   john+12345
   ```
 
-  This plaintext seen above, will then be used to derive a key that will then be used both to _lock_ and _unlock_ your passwords.
+  This plaintext seen above, will then be used to derive a key that will then be used both to _lock_ (encrypt) and _unlock_ (decrypt) your passwords.
 
 # 📀 Database
 
 The database for this project is designed using JSON files, structured as a [doubly linked list](https://en.wikipedia.org/wiki/Doubly_linked_list) to enable easy pagination both forwards and backwards. This structure provides a lightweight and flexible way to store and manage password entries without the overhead of a traditional database system.
+
+A database, in your file system, should look something like this:
+
+    /database
+    |
+    └─ /entries
+        └─ entry1.json
+        └─ entry2.json
+        └─ entry3.json
+
+For every operation that alters the state of the files (create, update, delete) and their relations, creates a temporary backup file with `.bak` extension which is then deleted right after the operation succeeds.
 
 #### Some aspects
 
@@ -34,7 +45,7 @@ The database for this project is designed using JSON files, structured as a [dou
 
 # 🧅 Client (Frontend)
 
-The client-side of the password manager is designed to be intuitive and user-friendly, ensuring that managing your passwords is a seamless experience. The frontend is built using modern web technologies to provide a responsive and accessible interface.
+The client-side is designed to be intuitive and user-friendly, ensuring that managing your passwords is a seamless experience. The frontend is built using modern web technologies to provide a responsive and accessible interface.
 
 #### Some aspects
 
@@ -42,6 +53,9 @@ The client-side of the password manager is designed to be intuitive and user-fri
 - User-Friendly Interface: Easy to navigate and manage your passwords.
 - Responsive Design: Accessible on various devices, including desktops, tablets, and smartphones.
 - Secure Interaction: Ensures that data transmitted between the client and server is encrypted and secure.
+- User can add, update and delete entries.
+- User can download a full backup of the database in a `.zip` compressed file.
+- User can authenticate.
 
 #### Folder structure (`./client`)
 
@@ -51,7 +65,7 @@ The client folder contains all the files related to the frontend of our applicat
 
 - `src/contexts` State management for some data that should be available across the app.
 
-- `src/models` APIs for handling the HTTP requests, cryptography utilities, and anything else that might relate to the core functionality of the project.
+- `src/models` APIs for handling the HTTP requests, cryptography utilities, and anything else that might relate to the core functionality of the frontend.
 
 # 🌩️ Server (Backend)
 
@@ -101,4 +115,4 @@ I welcome contributions from the community! If you have any ideas, suggestions, 
 
 For any questions or if you simply want to connect, find me at [LinkedIn](https://www.linkedin.com/in/joaogeraldes89/)
 
-Thank you for reading the Cebola - Self Custody Password Manager doc!
+Thank you for reading the Cebola - Self Custody Password Manager documentation!
