@@ -98,6 +98,7 @@ _Start the backend_
 1. Open a terminal on `./server`.
 1. `npm install` _dependencies are installed_
 1. `npm start` _server starts at port 9000 (default)_
+1. `npm test` (optional) _executes all test suits available within directory._
 
 ---
 
@@ -106,6 +107,7 @@ _Start the frontend_
 1. Open a terminal on `./client`.
 1. `npm install` _dependencies are installed_
 1. `npm start` _server starts at port 3000 (default)_
+1. `npm test` (optional) _executes all test suits available within directory._
 
 # 🚀 Contribution
 
