@@ -21,3 +21,5 @@
 - instead of storing plain text on session storage (ie: username+password) store it in cipher text.
 
 - implement a searching feature, which searches by entry's description.
+
+- increase tests coverage
