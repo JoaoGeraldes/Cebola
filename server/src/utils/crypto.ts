@@ -1,7 +1,5 @@
 import crypto from "crypto";
 
-const algorithm = "aes-256-cbc"; // Using AES encryption
-
 export function encrypt(plainText: string, privateKey: string, iv: string) {
   if (!plainText || !privateKey || !iv) {
     console.log("decrypt() -> Missing arguments.");
@@ -14,13 +12,17 @@ export function encrypt(plainText: string, privateKey: string, iv: string) {
       .update(privateKey)
       .digest();
 
-    const ivBuffer = Buffer.from(iv, "hex");
+    const ivBuffer = Buffer.from(iv, "base64");
 
-    const cipher = crypto.createCipheriv(algorithm, hashedPrivateKey, ivBuffer);
+    const cipher = crypto.createCipheriv(
+      "aes-256-gcm",
+      hashedPrivateKey,
+      ivBuffer
+    );
 
-    let encrypted = cipher.update(plainText, "utf8", "hex");
+    let encrypted = cipher.update(plainText, "utf8", "base64");
 
-    encrypted += cipher.final("hex");
+    encrypted += cipher.final("base64");
 
     return encrypted;
   } catch (e) {
@@ -41,20 +43,32 @@ export function decrypt(cipherText: string, privateKey: string, iv: string) {
       .update(privateKey)
       .digest();
 
-    const ivBuffer = Buffer.from(iv, "hex");
+    const ivBuffer = Buffer.from(iv, "base64");
 
     const decipher = crypto.createDecipheriv(
-      algorithm,
+      "aes-256-gcm",
       hashedPrivateKey,
       ivBuffer
     );
 
-    let decrypted = decipher.update(cipherText, "hex", "utf8");
+    let decrypted = decipher.update(cipherText, "base64", "utf8");
 
     decrypted += decipher.final("utf8");
 
     return decrypted;
   } catch (e) {
     console.log("decrypt() - Failed to decrypt: " + e);
+  }
+}
+
+export function generateSHA256Hash(plainText: string) {
+  try {
+    const hash = crypto.createHash("sha256");
+    hash.update(plainText);
+    const result = hash.digest("hex");
+    return result;
+  } catch (e) {
+    console.log("Failed to generate hash!");
+    return null;
   }
 }

@@ -18,7 +18,12 @@ export default function Login(props: Props) {
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    onSubmit(inputData);
+    const trimmedInputData: typeof inputData = {
+      username: inputData.username.trim(),
+      password: inputData.password.trim(),
+    };
+
+    onSubmit(trimmedInputData);
   }
 
   return (
@@ -27,6 +32,7 @@ export default function Login(props: Props) {
       <form onSubmit={handleSubmit}>
         <Label htmlFor="username">username</Label>
         <Input
+          value={inputData.username}
           autoComplete="one-time-code"
           id="username"
           type="text"
@@ -37,6 +43,7 @@ export default function Login(props: Props) {
 
         <Label htmlFor="password">password</Label>
         <Input
+          value={inputData.password}
           autoComplete="one-time-code"
           id="password"
           type="text"
