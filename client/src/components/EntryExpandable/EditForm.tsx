@@ -1,5 +1,6 @@
+import { useTheme } from "styled-components";
 import { Entry, UpdateEntry } from "../../../../types";
-import { theme } from "../../theme";
+
 import Button from "../Button";
 import Disk from "../Icons/Disk";
 import Return from "../Icons/Return";
@@ -26,6 +27,8 @@ export default function EditForm(props: Props) {
     handleOnEditSave,
     handleInputChange,
   } = props;
+
+  const theme = useTheme();
 
   return (
     <form>
@@ -65,11 +68,11 @@ export default function EditForm(props: Props) {
 
       <div className="actions">
         <Button onClick={handleOnEditSave}>
-          <Disk fill={theme.color.yellow} />
+          <Disk fill={theme.color.b} />
           &nbsp;Save
         </Button>
         <Button onClick={() => setIsEditing(false)}>
-          <Return fill={theme.color.yellow} />
+          <Return fill={theme.color.b} />
           &nbsp; Cancel
         </Button>
       </div>

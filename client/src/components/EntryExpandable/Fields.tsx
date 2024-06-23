@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { Entry, UpdateEntry } from "../../../../types";
 import { CebolaClient } from "../../models/CebolaClient";
-import { theme } from "../../theme";
 import { copyToClipboard } from "../../utils";
 import Button from "../Button";
 import Bin from "../Icons/Bin";
@@ -11,6 +10,7 @@ import Pencil from "../Icons/Pencil";
 import Label from "../Label";
 import { UserContext } from "../../contexts/UserContext";
 import { MessageContext } from "../../contexts/MessageContext";
+import { useTheme } from "styled-components";
 
 interface Props {
   reveal: boolean;
@@ -50,6 +50,8 @@ export default function Fields(props: Props) {
     handleDelete,
   } = props;
 
+  
+
   return isExpanded ? (
     <Expanded
       entry={entry}
@@ -73,7 +75,7 @@ const Expanded = (props: ExpandedProps) => {
     handleDelete,
     setIsEditing,
   } = props;
-
+  const theme = useTheme();
   const user = useContext(UserContext);
   const { setMessage } = useContext(MessageContext);
 
@@ -94,7 +96,7 @@ const Expanded = (props: ExpandedProps) => {
 
         <div className="password-actions">
           <Button id="password-btn" onClick={() => setReveal(!reveal)}>
-            <Horus fill={theme.color.yellow} />
+            <Horus fill={theme.color.b} />
           </Button>
           <Button
             onClick={async () => {
@@ -115,7 +117,7 @@ const Expanded = (props: ExpandedProps) => {
               );
             }}
           >
-            <Clipboard fill={theme.color.yellow} />
+            <Clipboard fill={theme.color.b} />
           </Button>
         </div>
       </div>
@@ -128,12 +130,12 @@ const Expanded = (props: ExpandedProps) => {
 
       <div className="actions">
         <Button onClick={handleDelete}>
-          <Bin fill={theme.color.yellow} />
+          <Bin fill={theme.color.b} />
           &nbsp;Delete
         </Button>
 
         <Button onClick={() => setIsEditing(true)}>
-          <Pencil fill={theme.color.yellow} />
+          <Pencil fill={theme.color.b} />
           &nbsp; Edit
         </Button>
       </div>

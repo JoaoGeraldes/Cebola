@@ -1,22 +1,21 @@
-export const theme = {
+const light = {
   color: {
-    white: "#ffffff",
-    yellow: "#c3b44f",
-    intenseGreen: "#66ff00",
-    dullGreen: "#a2b298",
-    memeGreen: "#baff76",
+    a: "#ffffff",
+    b: "#c3b44f",
+    c: "#66ff00",
+    d: "#a2b298",
+    e: "#baff76",
   },
 
   borderColor: {
-    green1: "#64735b",
-    green2: "#30372a",
+    a: "#64735b",
+    b: "#30372a",
   },
 
   background: {
-    green1: "#4c5844",
-    green2: "#3e4637",
-    green4: "#31372d",
-    green5: "#64735b",
+    a: "#4c5844",
+    b: "#3e4637",
+    c: "#31372d",
   },
 
   margin: {
@@ -39,4 +38,50 @@ export const theme = {
   },
 };
 
-export type Themezor = typeof theme;
+const dark = {
+  color: {
+    a: "#f5f5f5",
+    b: "#ffd600", // buttons and icon color
+    c: "#b6b6b6",
+    d: "#999999",
+    e: "#00a7ff",
+  },
+
+  borderColor: {
+    a: "#3b3b3b",
+    b: "#0d0d0d",
+  },
+
+  background: {
+    a: "#2b2b2b", // box sections background color + buttons background default state
+    b: "#161616", // mouse hover button color + inputs background
+    c: "#1f1f1f",
+    d: "#64735b",
+  },
+
+  margin: {
+    default: "6px",
+    double: "12px",
+  },
+
+  padding: {
+    default: "10px",
+    lil: "4px",
+    box: "16px",
+  },
+
+  textShadow: {
+    subtle: "1px 1px 1px #00000066",
+  },
+
+  boxShadow: {
+    subtle: "0px 1px 1px #00000059",
+  },
+};
+
+export const theme = {
+  light,
+  dark,
+};
+
+export type Themezor = typeof theme.light;

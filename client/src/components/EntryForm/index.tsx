@@ -2,9 +2,8 @@ import { useState } from "react";
 import { NewEntry } from "../../../../types";
 import Input from "../Input";
 import Button from "../Button";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import Plus from "../Icons/Plus";
-import { theme } from "../../theme";
 import Return from "../Icons/Return";
 import Disk from "../Icons/Disk";
 import Label from "../Label";
@@ -16,6 +15,7 @@ interface Props {
 
 export default function EntryForm(props: Props) {
   const { onSubmit, onCancel } = props;
+  const theme = useTheme();
 
   const [formData, setFormData] = useState<NewEntry>({
     description: "",
@@ -42,7 +42,7 @@ export default function EntryForm(props: Props) {
     <StyledForm onSubmit={handleSubmit}>
       <div className="limiter">
         <h1>
-          <Plus fill={theme.color.dullGreen} /> Add new entry
+          <Plus fill={theme.color.d} /> Add new entry
         </h1>
         <span className="hint">
           <span className="required">{requiredIcon}</span> -{" "}
@@ -82,11 +82,11 @@ export default function EntryForm(props: Props) {
         />
         <div className="actions">
           <Button type="button" onClick={onCancel}>
-            <Return fill={theme.color.yellow} />
+            <Return fill={theme.color.b} />
             &nbsp;Cancel
           </Button>
           <Button type="submit">
-            <Disk fill={theme.color.yellow} />
+            <Disk fill={theme.color.b} />
             &nbsp;Save
           </Button>
         </div>
@@ -96,7 +96,7 @@ export default function EntryForm(props: Props) {
 }
 
 const StyledForm = styled("form")`
-  background: ${(props) => props.theme.background.green1};
+  background: ${(props) => props.theme.background.a};
   padding: ${(props) => props.theme.padding.box};
   display: flex;
   flex-direction: column;
@@ -107,16 +107,16 @@ const StyledForm = styled("form")`
   animation: fadeIn 0.3s;
 
   h1 {
-    color: ${(props) => props.theme.color.white};
+    color: ${(props) => props.theme.color.a};
   }
 
   .hint {
-    color: ${(props) => props.theme.color.white};
+    color: ${(props) => props.theme.color.a};
     text-align: right;
   }
 
   .required {
-    color: ${(props) => props.theme.color.yellow};
+    color: ${(props) => props.theme.color.b};
   }
 
   .limiter {
