@@ -89,4 +89,20 @@ export class CebolaCrypto {
       throw e;
     }
   }
+
+  private static arrayBufferToHex(buffer: ArrayBuffer) {
+    const byteArray = new Uint8Array(buffer);
+    const hexString = Array.from(byteArray, (byte) => {
+      return ("0" + byte.toString(16)).slice(-2);
+    }).join("");
+    return hexString;
+  }
+
+  static async generateSHA256Hash(plainText: string) {
+    const encoder = new TextEncoder();
+    const messageBuffer = encoder.encode(plainText);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", messageBuffer);
+    const hashHex = this.arrayBufferToHex(hashBuffer);
+    return hashHex;
+  }
 }

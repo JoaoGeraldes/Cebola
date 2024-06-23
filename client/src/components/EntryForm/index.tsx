@@ -28,7 +28,7 @@ export default function EntryForm(props: Props) {
     const id = e.target.id as keyof typeof formData;
     const value = e.target.value;
 
-    setFormData({ ...formData, [id]: value });
+    setFormData({ ...formData, [id]: value?.trim() });
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

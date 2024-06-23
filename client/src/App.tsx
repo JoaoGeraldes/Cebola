@@ -99,9 +99,9 @@ function App() {
         <Modal>
           <Login
             onSubmit={async (inputData) => {
-              const respo = await CebolaClient.login(inputData);
+              const response = await CebolaClient.login(inputData);
 
-              if (respo?.token) {
+              if (response?.token) {
                 setIsAuthenticated(true);
                 loadEntries(null);
                 setUser(inputData);
