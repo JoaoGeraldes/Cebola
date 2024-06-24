@@ -69,7 +69,7 @@ const MessageWrapper = styled("div")`
   cursor: pointer;
 
   .message {
-    background: ${(props) => props.theme.color.yellow};
+    background: ${(props) => props.theme.color.b};
     display: flex;
     padding: 8px;
     width: 100%;

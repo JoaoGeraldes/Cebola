@@ -41,3 +41,13 @@ export function minutesPassedSince(seconds: number) {
 
   return minutes;
 }
+
+export function getThemeFromLocalStorage() {
+  const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
+
+  if (storedTheme) {
+    return storedTheme;
+  } else {
+    return "light";
+  }
+}

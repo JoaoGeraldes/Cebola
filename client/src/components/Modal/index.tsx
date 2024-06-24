@@ -9,7 +9,7 @@ export default function Modal({ children }: Props) {
 }
 
 const StyledModal = styled("div")`
-  background: ${(props) => props.theme.background.green4};
+  background: ${(props) => props.theme.background.c};
   padding: ${(props) => props.theme.padding.default};
   display: flex;
   flex-direction: column;

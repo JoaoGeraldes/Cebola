@@ -167,7 +167,7 @@ const StyledEntry = styled("div")`
     display: flex;
     width: 100%;
     justify-content: space-between;
-    color: ${(props) => props.theme.color.dullGreen};
+    color: ${(props) => props.theme.color.d};
     text-shadow: ${(props) => props.theme.textShadow.subtle};
     align-items: center;
     cursor: pointer;
@@ -187,19 +187,19 @@ const StyledEntry = styled("div")`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    background: ${(props) => props.theme.background.green1};
+    background: ${(props) => props.theme.background.a};
     padding: ${(props) => props.theme.padding.default};
     box-shadow: ${(props) => props.theme.boxShadow.subtle};
     position: relative;
 
     span {
-      color: ${(props) => props.theme.color.white};
+      color: ${(props) => props.theme.color.a};
       text-shadow: ${(props) => props.theme.textShadow.subtle};
       max-width: 57%;
     }
   }
 
   #password {
-    color: ${(props) => props.theme.color.memeGreen};
+    color: ${(props) => props.theme.color.e};
   }
 `;
