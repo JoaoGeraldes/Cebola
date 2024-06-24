@@ -27,6 +27,7 @@ const StyledInput = styled("input")<Props>`
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.color.c};
     outline-style: dashed;
+    opacity: 1;
   }
 
   &:hover {

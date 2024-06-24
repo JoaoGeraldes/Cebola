@@ -1,14 +1,32 @@
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import Button from "../Button";
+import Sun from "../Icons/Sun";
+import { useContext } from "react";
+import { ThemeContext } from "../../contexts/ThemeContext";
+import Moon from "../Icons/Moon";
 
-interface Props {
-  onToggle: () => void;
-}
+export default function ThemeToggle() {
+  const theme = useTheme();
+  const { currentTheme, setTheme } = useContext(ThemeContext);
 
-export default function ThemeToggle({ onToggle }: Props) {
   return (
     <StyledContainer>
-      <Button onClick={onToggle}>Toggle</Button>
+      <Button
+        onClick={() => {
+          const changeToTheme = currentTheme === "dark" ? "light" : "dark";
+
+          localStorage.setItem("theme", changeToTheme);
+          currentTheme === "dark"
+            ? setTheme(changeToTheme)
+            : setTheme(changeToTheme);
+        }}
+      >
+        {currentTheme === "dark" ? (
+          <Sun fill={theme.color.b} />
+        ) : (
+          <Moon fill={theme.color.b} />
+        )}
+      </Button>
     </StyledContainer>
   );
 }
