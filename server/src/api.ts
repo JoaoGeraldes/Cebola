@@ -4,8 +4,7 @@ import { Entry, RequestPayload } from "../../types.ts";
 import { CebolaServer } from "./CebolaServer.ts";
 import { auth } from "./config.ts";
 import jwt from "jsonwebtoken";
-import { decrypt } from "./utils/crypto.ts";
-import { getFileSize, zipDirectory } from "./utils/utils.ts";
+import { getFileSize, hasMissingFields, zipDirectory } from "./utils/utils.ts";
 import { existsSync } from "fs";
 
 const app = express();
@@ -50,7 +49,7 @@ app.post("/verify-token", verifyJWTToken, (req, res) => {
 });
 
 /* ------------------------------- */
-/* --------- GET /BACKUP --------- */
+/* --------- GET /backup --------- */
 /* ------------------------------- */
 app.get("/backup", verifyJWTToken, async (req, res) => {
   try {
@@ -75,7 +74,7 @@ app.get("/backup", verifyJWTToken, async (req, res) => {
 });
 
 /* ------------------------------ */
-/* --------- GET /LOGIN --------- */
+/* --------- GET /login --------- */
 /* ------------------------------ */
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
@@ -161,9 +160,8 @@ app.get("/entries", verifyJWTToken, async (req, res) => {
 /* ------------------------------ */
 /* --------- GET /entry --------- */
 /* ------------------------------ */
-app.get("/entry", (req, res) => {
-  req;
-  req.res.send("Hello Worldd!");
+app.get("/entry", verifyJWTToken, (req, res) => {
+  req.res.send("To be implemented...");
 });
 
 /* ------------------------------- */
@@ -236,9 +234,9 @@ app.patch("/entry", async (req, res) => {
   }
 });
 
-/* ---------------------------------------- */
-/* --------- DELETE /entry/delete --------- */
-/* ---------------------------------------- */
+/* --------------------------------- */
+/* --------- DELETE /entry --------- */
+/* --------------------------------- */
 app.delete("/entry", async (req, res) => {
   const errors = {
     missingFields: { error: "Missing entry id" },
@@ -267,17 +265,3 @@ app.delete("/entry", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-// Utils
-function hasMissingFields(entry: RequestPayload.POST.Entry["body"]) {
-  try {
-    console.log("hasMissingFields", entry);
-    if (!entry || !entry.description || !entry.password) {
-      return true;
-    }
-
-    return false;
-  } catch {
-    return true;
-  }
-}

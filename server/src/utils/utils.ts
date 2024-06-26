@@ -1,12 +1,13 @@
-import fs from "fs/promises";
-import fs2 from "fs";
+import fsPromises from "fs/promises";
+import fs from "fs";
 import path from "path";
 import archiver from "archiver";
 import { relativePath } from "../config.ts";
+import { RequestPayload } from "../../../types.ts";
 
 export async function copyFile(source: string, destination: string) {
   try {
-    const sourceExists = fs2.existsSync(source);
+    const sourceExists = fs.existsSync(source);
 
     console.log(
       `Did not find the source provided. The source provided is: ${source}`
@@ -14,7 +15,7 @@ export async function copyFile(source: string, destination: string) {
 
     if (!sourceExists) return null;
 
-    await fs.copyFile(source, destination);
+    await fsPromises.copyFile(source, destination);
     return true;
   } catch (error) {
     console.error("Error copying file:", error);
@@ -24,14 +25,14 @@ export async function copyFile(source: string, destination: string) {
 
 export async function deleteFile(filePath: string) {
   try {
-    const fileExists = fs2.existsSync(filePath);
+    const fileExists = fs.existsSync(filePath);
 
     if (!fileExists) {
       console.log(`${filePath} NOT found. Skipping...`);
       return;
     }
 
-    await fs.unlink(filePath);
+    await fsPromises.unlink(filePath);
     console.log(`${filePath} was deleted successfully`);
     return true;
   } catch (error) {
@@ -55,7 +56,7 @@ export async function zipDirectory(
 ): Promise<string | null> {
   return new Promise((resolve, reject) => {
     // create a file to stream archive data to.
-    const output = fs2.createWriteStream(outPath);
+    const output = fs.createWriteStream(outPath);
     const archive = archiver("zip", {
       zlib: { level: 9 }, // Sets the compression level.
     });
@@ -112,10 +113,23 @@ export async function zipDirectory(
 
 export function getFileSize(filePath: string) {
   try {
-    const stats = fs2.statSync(filePath);
+    const stats = fs.statSync(filePath);
     return stats.size;
   } catch (err) {
     console.error("Error getting file size:", err);
     return null;
+  }
+}
+
+export function hasMissingFields(entry: RequestPayload.POST.Entry["body"]) {
+  try {
+    console.log("hasMissingFields", entry);
+    if (!entry || !entry.description || !entry.password) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return true;
   }
 }
